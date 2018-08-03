@@ -13,8 +13,12 @@ import {
 export default class UpperBar extends Component {
     /**props
      * title
-     * rightTextClicked()
-     * rightText
+     * right1Clicked()
+     * right1Res
+     * right1Enabled
+     * right2Clicked()
+     * right2Res
+     * right2Enabled
      * backClicked()
      * backEnabled
      */
@@ -24,8 +28,11 @@ export default class UpperBar extends Component {
 
         this.state = {
             title:"",
-            rightText : "",
             backEnabled : false,
+            right1Res: require("../res/images/plus.png"),
+            right2Res: require("../res/images/plus.png"),
+            right1Enabled : true,
+            right2Enabled : true,
         }
 
     }
@@ -34,7 +41,12 @@ export default class UpperBar extends Component {
         this.setState({
             title:this.props.title,
             rightText:this.props.rightText,
-            backEnabled:this.props.backEnabled,
+            backEnabled:this.props.backEnabled !== undefined ? this.props.backEnabled:false,
+            right1Enabled:this.props.right1Enabled !== undefined ? this.props.right1Enabled:true,
+            right2Enabled:this.props.right2Enabled !== undefined ? this.props.right2Enabled:true,
+            right1Res:this.props.right1Res !== undefined ? this.props.right1Res : require("../res/images/plus.png"),
+            right2Res:this.props.right2Res !== undefined ? this.props.right2Res : require("../res/images/plus.png"),
+
         })
     }
 
@@ -45,9 +57,15 @@ export default class UpperBar extends Component {
         }
     }
 
-    onRightTextClicked(){
-        if(this.props.rightTextClicked !== undefined) {
-            this.props.rightTextClicked();
+    onRight1Clicked(){
+        if(this.props.right1Clicked !== undefined) {
+            this.props.right1Clicked();
+        }
+    }
+
+    onRight2Clicked(){
+        if(this.props.right1Clicked !== undefined) {
+            this.props.right1Clicked();
         }
     }
 
@@ -55,12 +73,6 @@ export default class UpperBar extends Component {
     setTitle(text){
         this.setState({
             title:text,
-        })
-    }
-
-    setRightText(text){
-        this.setState({
-            rightText:text,
         })
     }
 
@@ -72,9 +84,16 @@ export default class UpperBar extends Component {
 
 
     render() {
-        if(this.state.backEnabled === undefined || this.state.backEnabled === true){
-            var backImage = <Image style={styles.back}
-                                   source={require("../res/images/back.png")}/>;
+        if(this.state.backEnabled === true){
+            var backImage = <Image style={styles.back} source={require("../res/images/back.png")}/>;
+        }
+
+        if(this.state.right1Enabled === true){
+            var right1Image = <Image style={styles.rightImage} source={this.state.right1Res}/>;
+        }
+
+        if(this.state.right2Enabled === true){
+            var right2Image = <Image style={styles.rightImage} source={this.state.right2Res}/>;
         }
 
         return (
@@ -88,11 +107,24 @@ export default class UpperBar extends Component {
 
                     <Text style={styles.logoText}>{this.state.title}</Text>
 
-                    <TouchableOpacity
+                    <View
                         style={styles.rightTextContainer}
-                        onPress={()=>this.onRightTextClicked()}>
-                        <Text style={styles.rightText}>{this.state.rightText}</Text>
-                    </TouchableOpacity>
+                    >
+                        <TouchableOpacity
+                            style={styles.rightImageContainer}
+                            onPress={()=>this.onRight1Clicked()}
+                        >
+                            {right1Image}
+                        </TouchableOpacity>
+                        <View style={{flex:1}}/>
+                        <TouchableOpacity
+                            style={styles.rightImageContainer}
+                            onPress={()=>this.onRight2Clicked()}
+                        >
+                            {right2Image}
+                        </TouchableOpacity>
+                    </View>
+
                 </View>
                 <View style={styles.shadow}/>
             </View>
@@ -112,15 +144,24 @@ const styles = StyleSheet.create({
         justifyContent:"center",
     },rightTextContainer:{
         position:"absolute",
+        flexDirection:'row',
         height:upperBarHeight,
-        width:upperBarHeight+10,
+        width:upperBarHeight*1.4,
         justifyContent:'center',
-        right:6,
-    },rightText:{
-        textAlign:"center",
-        fontSize:15,
-        color:"#3D485E",
-    },logoText:{
+        right:0,
+        alignItems:'center',
+        marginRight:15,
+    },rightImageContainer:{
+        justifyContent:'center',
+        height:upperBarHeight,
+        width:upperBarHeight-2,
+    },
+    rightImage:{
+        width:upperBarHeight*0.5,
+        height:upperBarHeight*0.5,
+        alignSelf:'center',
+    },
+    logoText:{
         flex:1,
         textAlign:"center",
         alignSelf:'center',
@@ -140,6 +181,6 @@ const styles = StyleSheet.create({
     },
     shadow:{
         height:1,
-        backgroundColor:"#A5BAE5"
+        // backgroundColor:"#A5BAE5"
     }
 });
