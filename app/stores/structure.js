@@ -58,3 +58,9 @@ class UserStore {
     totalCorrect = 0;
 
 }
+
+class UpperBarStore{
+    title = "Repeati";
+    backButtonEnabled = false;
+    backPressed = () => {};
+}

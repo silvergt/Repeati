@@ -34,10 +34,21 @@ export class DictionaryStore {
         });
     }
 
+
+
     getWordbookById(wordbookID){
         for(let i=0;i<this.wordbook.length;i++){
             if(wordbookID === this.wordbook[i].id){
                 return toJS(this.wordbook[i]);
+            }
+        }
+        return undefined;
+    }
+
+    getWordbookIndexById(wordbookID){
+        for(let i=0;i<this.wordbook.length;i++){
+            if(wordbookID === this.wordbook[i].id){
+                return i;
             }
         }
         return undefined;

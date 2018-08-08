@@ -9,10 +9,10 @@ import {
     TouchableOpacity,
     Image,
 } from 'react-native';
+import {name as appName} from '../../app.json';
 
 export default class UpperBar extends Component {
     /**props
-     * title
      * right1Clicked()
      * right1Res
      * right1Enabled
@@ -20,15 +20,12 @@ export default class UpperBar extends Component {
      * right2Res
      * right2Enabled
      * backClicked()
-     * backEnabled
      */
 
     constructor(){
         super();
 
         this.state = {
-            title:"",
-            backEnabled : false,
             right1Res: require("../res/images/plus.png"),
             right2Res: require("../res/images/plus.png"),
             right1Enabled : true,
@@ -39,22 +36,17 @@ export default class UpperBar extends Component {
 
     componentDidMount(){
         this.setState({
-            title:this.props.title,
-            rightText:this.props.rightText,
             backEnabled:this.props.backEnabled !== undefined ? this.props.backEnabled:false,
             right1Enabled:this.props.right1Enabled !== undefined ? this.props.right1Enabled:true,
             right2Enabled:this.props.right2Enabled !== undefined ? this.props.right2Enabled:true,
             right1Res:this.props.right1Res !== undefined ? this.props.right1Res : require("../res/images/plus.png"),
-            right2Res:this.props.right2Res !== undefined ? this.props.right2Res : require("../res/images/plus.png"),
-
+            right2Res:this.props.right2Res !== undefined ? this.props.right2Res : require("../res/images/settings.png"),
         })
     }
 
 
     onBackClicked(){
-        if(this.props.backClicked !== undefined) {
-            this.props.backClicked();
-        }
+        this.props.upperBarStore.backPressed();
     }
 
     onRight1Clicked(){
@@ -64,27 +56,13 @@ export default class UpperBar extends Component {
     }
 
     onRight2Clicked(){
-        if(this.props.right1Clicked !== undefined) {
-            this.props.right1Clicked();
+        if(this.props.right2Clicked !== undefined) {
+            this.props.right2Clicked();
         }
     }
 
-
-    setTitle(text){
-        this.setState({
-            title:text,
-        })
-    }
-
-    setBackEnabled(enable){
-        this.setState({
-            backEnabled:enable,
-        })
-    }
-
-
     render() {
-        if(this.state.backEnabled === true){
+        if(this.props.upperBarStore.backButtonEnabled === true){
             var backImage = <Image style={styles.back} source={require("../res/images/back.png")}/>;
         }
 
@@ -105,7 +83,7 @@ export default class UpperBar extends Component {
                         {backImage}
                     </TouchableOpacity>
 
-                    <Text style={styles.logoText}>{this.state.title}</Text>
+                    <Text style={styles.logoText}>TITLE</Text>
 
                     <View
                         style={styles.rightTextContainer}
