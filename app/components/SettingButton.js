@@ -28,7 +28,7 @@ export default class SettingButton extends Component {
     }
 
     render() {
-        var ImgVar;
+        let ImgVar;
 
         if(this.state.setToSetting){
             ImgVar =

@@ -8,16 +8,21 @@ import React, {Component} from 'react';
 import {
     StyleSheet,
     View,
-    Platform,
-    Dimensions,
     Image,
     Text,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions,
 } from 'react-native';
 import Modal from 'react-native-modalbox'
 
 
 export default class AddWordPopup extends Component {
+    /**
+     * @props;
+     * onAddNewFolder()
+     * onAddNewWord()
+     *
+     */
 
     show(){
         this.modal.open();
@@ -26,12 +31,16 @@ export default class AddWordPopup extends Component {
         this.modal.close();
     }
 
-    addNewFolderScreen(){
-
+    openAddNewFolderScreen(){
+        if(this.props.onAddNewFolder !== undefined){
+            this.props.onAddNewFolder();
+        }
     }
 
-    addNewWordScreen(){
-
+    openAddNewWordScreen(){
+        if(this.props.onAddNewWord !== undefined){
+            this.props.onAddNewWord();
+        }
     }
 
     render() {
@@ -43,17 +52,19 @@ export default class AddWordPopup extends Component {
                 style={styles.container}
                 position='top'
                 backdrop={true}
+                backButtonClose={true}
+                entry='top'
             >
                 <TouchableOpacity style={[styles.buttonContainer,{paddingLeft:20}]}
                                   activeOpacity={0.5}
-                                  onPress={()=>{this.addNewFolderScreen()}}>
+                                  onPress={()=>{this.openAddNewFolderScreen()}}>
                     <Image style={styles.buttonImage} source={require("../res/images/folder.png")}/>
                     <View style={styles.buttonPadding}/>
                     <Text style={styles.buttonText}>폴더 추가</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.buttonContainer,{paddingRight:20}]}
                                   activeOpacity={0.5}
-                                  onPress={()=>{this.addNewWordScreen()}}>
+                                  onPress={()=>{this.openAddNewWordScreen()}}>
                     <Image style={styles.buttonImage} source={require("../res/images/word.png")}/>
                     <View style={styles.buttonPadding}/>
                     <Text style={styles.buttonText}>단어 추가</Text>

@@ -8,11 +8,12 @@ import React, {Component} from 'react';
 import {
     StyleSheet,
     View,
+    Platform,
     Text,
     TouchableOpacity,
     Image,
     TextInput,
-    Dimensions
+    Dimensions, Alert
 } from 'react-native';
 import {inject,observer} from 'mobx-react'
 
@@ -20,15 +21,21 @@ const screen = Dimensions.get('window');
 
 @inject("dictStore")
 @observer
-export default class ReviseWordbook extends Component {
+export default class AddNewFolder extends Component {
 
+    /**
+     * @param;
+     * navigation
+     * onGoBack()
+     *
+     */
 
     static navigationOptions =({navigation}) =>{
         return(
             {
 
                 headerTitle:
-                    <Text>단어장 수정</Text>,
+                    <Text>단어장 추가</Text>,
                 headerLeft:
                     <TouchableOpacity style={
                         {
@@ -65,10 +72,7 @@ export default class ReviseWordbook extends Component {
     constructor(){
         super();
         this.state={
-            wordbookSpecifics:0,
-            wordbookLength:0,
-            wordbookCorrectRate:0,
-            revisedWordbookTitle:"",
+            wordbookTitle:"",
         };
         this.onClickedComplete = this.onClickedComplete.bind(this);
     }
@@ -77,39 +81,27 @@ export default class ReviseWordbook extends Component {
         this.props.navigation.setParams({
             holder:this,
         });
-
-        const retrievedWordbook = this.props.dictStore.getWordbookById(this.props.navigation.getParam('wordbookID',-1));
-
-        this.setState({
-            wordbookSpecifics:retrievedWordbook,
-            wordbookCorrectRate:this.getWordbookCorrectRate(retrievedWordbook.wordList),
-            wordbookLength:retrievedWordbook.wordList.length,
-            revisedWordbookTitle:retrievedWordbook.title,
-        });
-    }
-
-    getWordbookCorrectRate(wordList){
-        var totalSolved=0,totalCorrect=0;
-        for(let i=0;i<wordList.length;i++){
-            totalSolved+=wordList[i].totalSolved;
-            totalCorrect+=wordList[i].totalCorrect;
-        }
-
-        if(totalSolved === 0){return 0}
-        return (totalCorrect/totalSolved*100).toString().slice(0,5);
     }
 
     onClickedComplete(){
-        const wordbookIndex = this.props.dictStore.getWordbookIndexById(this.props.navigation.getParam('wordbookID',-1));
-        this.props.dictStore.wordbook[wordbookIndex].title=this.state.revisedWordbookTitle;
+        if(this.state.wordbookTitle === ""){
+            Alert.alert(
+                '앗!',
+                '단어장 이름을 입력해주세요!',
+                [
+                    {text: 'OK', onPress: () => console.log('OK Pressed') },
+                ]
+            );
+            return;
+        }
+
+        this.props.dictStore.addNewWordbook(this.state.revisedWordbookTitle);
 
         let goBackListener = this.props.navigation.getParam('onGoBack',-1);
         goBackListener();
 
         this.props.navigation.goBack()
     }
-
-
 
 
     render() {
@@ -127,14 +119,10 @@ export default class ReviseWordbook extends Component {
                             returnKeyType='done'
                             blurOnSubmit={true}
                             onChangeText={(text)=>{this.setState({revisedWordbookTitle:text})}}
-                        >{this.state.wordbookSpecifics.title}</TextInput>
+                        >{this.state.revisedWordbookTitle}</TextInput>
                         <View style={{width:screen.width*2/3,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
                     </View>
-                    <View style={{height:60}}/>
-                    <Text style={styles.plainText}>단어 수 : {this.state.wordbookLength}</Text>
-                    <View style={{height:30}}/>
-                    <Text style={styles.plainText}>단어장 정답률 : {this.state.wordbookCorrectRate}%</Text>
-                    <View style={{flex:1}}/>
+                    <View style={{flex:1.5}}/>
                 </View>
                 <TouchableOpacity  style={styles.lowerButton}
                                    onPress={()=>{this.onClickedComplete()}}
@@ -153,8 +141,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         backgroundColor:'white',
         justifyContent:'center'
-    },
-    wordbookTextInputContainer:{
     },
     wordbookTextInput:{
         width:screen.width,

@@ -5,48 +5,45 @@ import {
     View,
     TouchableOpacity,
     Text,
-    Platform,
     FlatList,
     Image,
-    Dimensions
+    Animated,
+    Platform
 } from 'react-native';
-import PopupDialog from 'react-native-popup-dialog';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
-import UpperBar from "../components/UpperBar";
-import {getMeaning} from "../functions/dictionary";
 import {inject,observer} from 'mobx-react'
 import {clearState, retrieveState, saveState} from "../functions/storage";
+import AddWordPopup from "../components/AddWordPopup";
+import SettingButton from "../components/SettingButton"
+import YesNoPopup from "../components/YesNoPopup";
 import {toJS} from 'mobx'
-import AddWordPopup from "./AddWordPopup";
-import SettingButton from "../components/SettingButton";
 
-const screen = Dimensions.get("window");
 
 @inject("dictStore")
 @observer
 export default class WordPage extends Component {
-    static RENDERTYPE_WORD = "RENDERTYPE_WORD";      //단어장 리스트
-    static RENDERTYPE_WORDMODIFY = "RENDERTYPE_WORDMODIFY";      //단어장 수정 창
-    static MODIFY_NEEDED_MODIFY = "MODIFY_NEEDED_MODIFY";      //변경은 없지만 RENDERTYPE_WORDMODIFY로 리렌더링이 필요할 때
-    static MODIFY_NEEDED_WORD = "MODIFY_NEEDED_WORD";      //변경은 없지만 RENDERTYPE_WORD으로 리렌더링이 필요할 때
+    static RENDERTYPE_WORD = "RENDERTYPE_WORD";      //단어 리스트
+    static RENDERTYPE_WORDMODIFY = "RENDERTYPE_WORDMODIFY";      //단어 수정 리스트
+    static MODIFY_NEEDED_WORD = "MODIFY_NEEDED_WORD";      //변경은 없지만 RENDERTYPE_WORD로 리렌더링이 필요할 때
+    static MODIFY_NEEDED_WORDMODIFY = "MODIFY_NEEDED_WORDMODIFY";      //변경은 없지만 MODIFY_NEEDED_WORDMODIFY으로 리렌더링이 필요할 때
 
     static navigationOptions =({navigation}) =>{
         return(
             {
                 headerTitle:
-                    <Text>{appName}</Text>,
+                    <Text resizeMode="contain" style={{color:'black',}}>
+                        {navigation.state.params.wordbookTitle ? navigation.state.params.wordbookTitle : "단어장"}
+                        </Text>,
                 headerLeft:
-                    <TouchableOpacity style={
-                        {
+                    <TouchableOpacity
+                        style={{
                             width:50,
                             height:'100%',
                             justifyContent:'center',
                             alignItems:'center',
-
-                        }
-                    }
-                                      onPress={()=>{navigation.state.params.holder.onGoBack()}}
+                        }}
+                        onPress={()=>{navigation.state.params.holder.onGoBack()}}
                     >
                         <Image style={{width:20,height:20}} source={require("../res/images/back.png")}/>
                     </TouchableOpacity>,
@@ -54,6 +51,9 @@ export default class WordPage extends Component {
                     <View style={styles.headerRightContainer}>
                         <TouchableOpacity style={styles.headerImageContainer}
                                           onPress={()=>{
+                                              if(navigation.state.params.holder===undefined) {
+                                                  return;
+                                              }
                                               navigation.state.params.holder.addWordPopup.show()
                                           }}
                         >
@@ -61,24 +61,28 @@ export default class WordPage extends Component {
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.headerImageContainer}
                                           onPress={()=>{
+                                              if(navigation.state.params.holder===undefined) {
+                                                  return;
+                                              }
                                               navigation.state.params.holder.addWordPopup.close();
                                               switch (navigation.state.params.holder.state.flatListRenderType){
                                                   case WordPage.RENDERTYPE_WORD:
                                                       navigation.state.params.holder.setRenderMode(WordPage.RENDERTYPE_WORDMODIFY);
-                                                      this.settings.toggleButton(false);
+                                                      this.wordPageSettings.toggleButton(false);
                                                       break;
                                                   case WordPage.RENDERTYPE_WORDMODIFY:
                                                       navigation.state.params.holder.setRenderMode(WordPage.RENDERTYPE_WORD);
-                                                      this.settings.toggleButton(true);
+                                                      this.wordPageSettings.toggleButton(true);
                                                       break;
                                               }
                                           }}
                         >
                             <SettingButton
-                                ref={comp => this.settings = comp}
+                                ref={comp => this.wordPageSettings = comp}
                                 style={styles.headerImage}/>
                         </TouchableOpacity>
                     </View>
+
 
             }
         )
@@ -92,6 +96,8 @@ export default class WordPage extends Component {
             flatListRenderType: "",
             flatListData: undefined,
             selectedWordID:-1,
+
+            fadeVal: new Animated.Value(0),
         };
 
     }
@@ -103,23 +109,24 @@ export default class WordPage extends Component {
 
         this.setRenderMode(WordPage.RENDERTYPE_WORD);
 
+        this.setState({
+            flatListData: this.props.dictStore.wordbook[this.props.navigation.getParam('wordbookID',-1)].wordList,
+        });
     }
 
 
     //Call whenever renderType has to be changed
     setRenderMode(renderType){
-        console.log("TRY",this.props.dictStore.getWordbookById(this.props.navigation.getParam('wordbookID',-1)).wordList);
         switch (renderType){
             case WordPage.RENDERTYPE_WORD:
                 this.setState({
                     flatListRenderType: WordPage.RENDERTYPE_WORD,
-                    flatListData: this.props.dictStore.getWordbookById(this.props.navigation.getParam('wordbookID',-1)).wordList,
                 });
                 break;
             case WordPage.RENDERTYPE_WORDMODIFY:
                 this.setState({
                     flatListRenderType: WordPage.RENDERTYPE_WORDMODIFY,
-                    flatListData: this.props.dictStore.getWordbookById(this.props.navigation.getParam('wordbookID',-1)).wordList,
+                    flatListData: this.props.dictStore.wordbook[this.props.navigation.getParam('wordbookID',-1)].wordList,
                 });
                 break;
         }
@@ -131,22 +138,22 @@ export default class WordPage extends Component {
             case WordPage.RENDERTYPE_WORD:
                 return(
                     <WordView
+                        wordbookID={this.props.navigation.getParam('wordbookID',-1)}
                         word={item}
-                        onPress={()=>{
-                            
-                        }}
                     />
                 );
             case WordPage.RENDERTYPE_WORDMODIFY:
                 return(
                     <WordModifyView
+                        wordbookID={this.props.navigation.getParam('wordbookID',-1)}
                         word={item}
                         onPressModify={()=>{
                             this.props.navigation.navigate('ReviseWord', {
-                                wordID: item.id,
+                                wordbookID: this.props.navigation.getParam('wordbookID',-1),
+                                word:toJS(item),
                                 onGoBack: () => {
                                     this.setState({
-                                        flatListRenderType:WordPage.MODIFY_NEEDED_MODIFY,
+                                        flatListRenderType:WordPage.MODIFY_NEEDED_WORDMODIFY,
                                     })
                                 }
                             })
@@ -159,14 +166,14 @@ export default class WordPage extends Component {
                         }}
                     />
                 );
-            case WordPage.MODIFY_NEEDED_MODIFY:
-                this.setState({
-                    flatListRenderType:WordPage.RENDERTYPE_WORDMODIFY,
-                });
-                break;
             case WordPage.MODIFY_NEEDED_WORD:
                 this.setState({
                     flatListRenderType:WordPage.RENDERTYPE_WORD,
+                });
+                break;
+            case WordPage.MODIFY_NEEDED_WORDMODIFY:
+                this.setState({
+                    flatListRenderType:WordPage.RENDERTYPE_WORDMODIFY,
                 });
                 break;
         }
@@ -193,94 +200,234 @@ export default class WordPage extends Component {
                             return(this.setFlatListRenderItem(item,index));
                         }}
                         keyExtractor={(item, index) => index.toString()}
+                        ItemSeparatorComponent={()=><View style={{
+                                opacity:0.2,
+                                marginLeft:15,
+                                marginRight:15,
+                                height:1,
+                                backgroundColor:'#447677'
+                            }}/>
+                        }
                     />
 
                 </View>
                 <LowerBar/>
                 <AddWordPopup
-                    ref={comp => this.addWordPopup = comp}
-                    wordbookID={this.props.navigation.getParam('wordbookID',-1)}
+                    ref={comp=>this.addWordPopup = comp}
+                    onAddNewFolder={()=>{
+                        this.props.navigation.navigate('AddNewFolder',{
+                            onGoBack:()=>{
+                                this.addWordPopup.close();
+                            }
+                        })
+                    }}
+                    onAddNewWord={()=>{
+                        this.props.navigation.navigate('AddNewWord',{
+                            wordbookID:this.props.navigation.getParam('wordbookID',-1),
+                            onGoBack:()=>{
+                                this.addWordPopup.close();
+                                this.setState({
+                                    flatListRenderType:WordPage.MODIFY_NEEDED_WORD,
+                                });
+                            }
+                        })
+                    }}
                 />
-                <PopupDialog
-                    width={250}
-                    height={150}
-                    ref={comp => this.deletePopup = comp}>
-                    <View style={styles.deletePopupContainer}>
-                        <View style={{flex:1}}/>
-                        <Text style={styles.deletePopupText}>정말 선택한 단어들 삭제할거에요?</Text>
-                        <View style={{flex:1}}/>
-                        <View style={{height:40,flexDirection:'row'}}>
-                            <TouchableOpacity style={[styles.deletePopupButton,{
-                                // borderTopLeftRadius:10,
-                                borderBottomLeftRadius:5,
-                                backgroundColor:'#35466A',
-                            }]}
-                                              onPress={()=>{
-                                                  this.props.dictStore.deleteWordbook(this.state.selectedWordbookID);
-                                                  this.setState({
-                                                      flatListRenderType:WordPage.MODIFY_NEEDED_MODIFY,
-                                                      selectedWordbookID:-1,
-                                                  });
-                                                  this.deletePopup.dismiss();
-                                              }}
-                            >
-                                <Text style={styles.deletePopupButtonText}>삭제</Text>
-                            </TouchableOpacity>
-                            <View style={{width:1}}/>
-                            <TouchableOpacity style={[styles.deletePopupButton,{
-                                // borderTopRightRadius:10,
-                                borderBottomRightRadius:5,
-                                backgroundColor:'#35466A',
-                            }]}
-                                              onPress={()=>{this.deletePopup.dismiss()}}
-                            >
-                                <Text style={styles.deletePopupButtonText}>취소</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </PopupDialog>
+                <YesNoPopup
+                    ref={comp => this.deletePopup = comp}
+                    style={{width:250,height:150}}
+                    title={"정말 단어를 삭제하시겠습니까?"}
+                    left={"삭제"}
+                    right={"취소"}
+                    leftClicked={()=>{
+                        this.props.dictStore.deleteWord(this.props.navigation.getParam('wordbookID',-1),this.state.selectedWordID);
+                        this.setState({
+                            flatListRenderType:WordPage.MODIFY_NEEDED_WORDMODIFY,
+                            selectedWordID:-1,
+                        });
+                        this.deletePopup.close();
+                    }}
+                    rightClicked={()=>{
+                        this.deletePopup.close();
+                    }}
+
+                />
             </View>
         );
     }
 }
 
-
+@inject("dictStore")
 class WordView extends Component {
     /**
      * props:
      * word
-     * onPress()
      */
 
-    onPress(){
-        if(this.props.onPress !== undefined) {
-            this.props.onPress();
+    constructor(){
+        super();
+        this.animating = false;
+        this.state={
+            important:false,
+            // meanOpacity:Platform.OS === 'ios' ? new Animated.Value(0) : 0,
+            // imageOpacity:Platform.OS === 'ios' ? new Animated.Value(1) : 1,
+            meanOpacity:new Animated.Value(0),
+            imageOpacity: new Animated.Value(1),
+
         }
     }
 
+    componentDidMount(){
+        this.setState({
+            important:this.props.word.markedImportant,
+        })
+    }
+
+    markImportant(){
+        this.props.dictStore.setWordImportant(this.props.wordbookID,this.props.word.id,!this.state.important);
+        this.setState({
+            important:!this.state.important,
+        })
+    }
+
+    onWordViewPressed(){
+        this.animateMean();
+        // if(Platform.OS === 'ios'){
+        //     this.animateMean();
+        // }else{
+        //     this.showMean();
+        // }
+    }
+
+    animateMean(){
+        if(this.animating){
+            return;
+        }
+        this.animating = true;
+        Animated.timing(this.state.meanOpacity,{
+            toValue:1,
+            duration:1000
+        }).start();
+        Animated.timing(this.state.imageOpacity,{
+            toValue:0,
+            duration:1000
+        }).start();
+        setTimeout(()=>{
+            Animated.timing(this.state.meanOpacity,{
+                toValue:0,
+                duration:1000
+            }).start();
+            Animated.timing(this.state.imageOpacity,{
+                toValue:1,
+                duration:1000
+            }).start();
+            this.animating = false;
+        },3000);
+    }
+
+    //ONLY FOR ANDROID
+    showMean(){
+        console.log("TTT");
+        this.setState({
+            meanOpacity:1,
+            imageOpacity:0,
+        });
+        setTimeout(()=>{
+            console.log("MMM");
+            this.setState({
+                meanOpacity:0,
+                imageOpacity:1,
+            });
+        },3000);
+    }
+
+
     render(){
+        let starSource;
+        if(this.state.important){
+            starSource = require("../res/images/star_filled.png");
+        }else{
+            starSource = require("../res/images/star_empty.png");
+        }
+
+        let circleSource;
+        const correctRatio = this.props.word.totalCorrect/this.props.word.totalSolved;
+        if(correctRatio>=0.8){
+            circleSource = require("../res/images/circle_green.png");
+        }else if(correctRatio<=0.3){
+            circleSource = require("../res/images/circle_red.png");
+        }else{
+            circleSource = require("../res/images/circle_yellow.png");
+        }
+
         return(
-            <TouchableOpacity
-                onPress={()=>{this.onPress()}}
-                activeOpacity={0.8}
-            >
-                <View style={wordViewStyles.container}>
+            <View style={[wordViewStyles.container,]}>
+
+                <TouchableOpacity
+                    style={wordViewStyles.starContainer}
+                    onPress={()=>this.markImportant()}>
+                    <Image style={wordViewStyles.starImage} source={starSource}/>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[wordViewStyles.container,{flex:1,flexDirection:'row'}]}
+                    onPress={()=>{
+                        this.onWordViewPressed();
+                    }}
+                >
                     <Text style={wordViewStyles.wordTitle}>{this.props.word.word}</Text>
-                    <View style={{flex:1}}/>
-                    <Text style={wordViewStyles.wordTitle}>{this.props.word.mean}</Text>
-                </View>
-            </TouchableOpacity>
+
+                    <View style={wordViewStyles.rightContent}>
+                        <Animated.Image
+                            style={{
+                                ...wordViewStyles.circleImage,
+                                opacity:this.state.imageOpacity,
+                            }}
+                            source={circleSource}/>
+                        <Animated.Text
+                            style={{
+                                ...wordViewStyles.wordMean,
+                                opacity:this.state.meanOpacity,
+                            }}
+                            multiline={true}
+                        >
+                            {this.props.word.mean}</Animated.Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
         );
     }
 }
 
+@inject("dictStore")
 class WordModifyView extends Component {
     /**
      * props:
      * word
-     * onPressModify()
-     * onPressDelete()
      */
+
+    constructor(){
+        super();
+        this.state={
+            important:false,
+            meanOpacity:new Animated.Value(0),
+            imageOpacity:new Animated.Value(1),
+
+        }
+    }
+
+    componentDidMount(){
+        this.setState({
+            important:this.props.word.markedImportant,
+        })
+    }
+
+    markImportant(){
+        this.props.dictStore.setWordImportant(this.props.wordbookID,this.props.word.id,!this.state.important);
+        this.setState({
+            important:!this.state.important,
+        })
+    }
 
     onPressModify(){
         if(this.props.onPressModify !== undefined) {
@@ -295,23 +442,43 @@ class WordModifyView extends Component {
     }
 
     render(){
+        let starSource;
+        if(this.state.important){
+            starSource = require("../res/images/star_filled.png");
+        }else{
+            starSource = require("../res/images/star_empty.png");
+        }
+
         return(
-            <View style={wordViewStyles.container}>
-                <Text style={wordViewStyles.wordTitle}>{this.props.title}</Text>
-                <View style={{flex:1}}/>
+            <View style={[wordViewStyles.container,]}>
+
                 <TouchableOpacity
-                    style={wordViewStyles.wordButton}
-                    activeOpacity={0.8}
-                    onPress={()=>{this.onPressModify()}}>
-                    <Text style={wordViewStyles.wordTitle}>수정</Text>
+                    style={wordViewStyles.starContainer}
+                    onPress={()=>this.markImportant()}>
+                    <Image style={wordViewStyles.starImage} source={starSource}/>
                 </TouchableOpacity>
-                <View style={{width:10}}/>
-                <TouchableOpacity
-                    style={wordViewStyles.wordButton}
-                    activeOpacity={0.8}
-                    onPress={()=>{this.onPressDelete()}}>
-                    <Text style={wordViewStyles.wordTitle}>삭제</Text>
-                </TouchableOpacity>
+
+                <View style={[wordViewStyles.container,{flex:1,flexDirection:'row'}]}>
+                    <Text style={wordViewStyles.wordTitle}>{this.props.word.word}</Text>
+
+                    <View style={{flex:1}}/>
+
+                    <View style={wordViewStyles.rightModifyContent}>
+                        <TouchableOpacity
+                            style={wordViewStyles.wordbookModifyButton}
+                            activeOpacity={0.8}
+                            onPress={()=>{this.onPressModify()}}>
+                            <Text style={wordViewStyles.wordbookModifyTitle}>수정</Text>
+                        </TouchableOpacity>
+                        <View style={{width:10}}/>
+                        <TouchableOpacity
+                            style={wordViewStyles.wordbookModifyButton}
+                            activeOpacity={0.8}
+                            onPress={()=>{this.onPressDelete()}}>
+                            <Text style={wordViewStyles.wordbookModifyTitle}>삭제</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             </View>
         );
     }
@@ -340,49 +507,66 @@ const styles = StyleSheet.create({
         width:20,
         height:20
     },
-
-
-    deletePopupContainer:{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center',
-    },
-    deletePopupText:{
-        justifyContent:'center',
-        textAlign:'center',
-    },
-    deletePopupButton:{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center',
-    },
-    deletePopupButtonText:{
-        textAlign:'center',
-        color:'white'
-    }
 });
 
 const wordViewStyles = StyleSheet.create({
     container: {
         height:50,
         flexDirection: 'row',
-        backgroundColor:'#35466A',
         alignItems:'center',
-        marginLeft:15,
         marginRight:15,
-        marginTop:15,
-        paddingLeft:15,
-        paddingRight:15,
-        borderRadius:5,
+        marginLeft:15,
     },
     wordTitle:{
         textAlign:'center',
-        color:'white',
     },
     wordButton:{
         width:40,
         justifyContent:'center',
         alignSelf:'stretch',
-        color:'white',
+    },
+    starContainer: {
+        height:50,
+        flexDirection: 'row',
+        alignItems:'center',
+    },
+    starImage:{
+        width:18,
+        height:18,
+        alignSelf:'center',
+    },
+    circleImage:{
+        width:18,
+        height:18,
+        alignSelf:'center',
+        position:'absolute',
+        right:0,
+    },
+    wordMean:{
+        flex:1,
+        textAlign:'right',
+        color:'black',
+    },
+    rightContent:{
+        flex:1,
+        height:"100%",
+        alignItems:'center',
+        flexDirection:'row',
+        marginLeft:10,
+    },
+    rightModifyContent:{
+        height:"100%",
+        alignItems:'center',
+        flexDirection:'row',
+    },
+    wordbookModifyTitle:{
+        textAlign:'center',
+        color:'black',
+    },
+    wordbookModifyButton:{
+        width:40,
+        justifyContent:'center',
+        alignSelf:'stretch',
+        color:'black',
     },
 });

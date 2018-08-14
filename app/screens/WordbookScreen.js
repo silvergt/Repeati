@@ -5,21 +5,20 @@ import {
     View,
     TouchableOpacity,
     Text,
-    Platform,
     FlatList,
     Image,
-    Dimensions
+    Dimensions,
+    BackHandler,
+    Alert
 } from 'react-native';
-import PopupDialog from 'react-native-popup-dialog';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
-import UpperBar from "../components/UpperBar";
-import {getMeaning} from "../functions/dictionary";
 import {inject,observer} from 'mobx-react'
 import {clearState, retrieveState, saveState} from "../functions/storage";
 import {toJS} from 'mobx'
-import AddWordPopup from "./AddWordPopup";
+import AddWordPopup from "../components/AddWordPopup";
 import SettingButton from "../components/SettingButton";
+import YesNoPopup from "../components/YesNoPopup";
 
 const screen = Dimensions.get("window");
 
@@ -35,12 +34,11 @@ export default class WordbookScreen extends Component {
         return(
             {
                 headerTitle:
-                    <Text>{appName}</Text>,
+                    <Text style={{color:'black'}}>{appName}</Text>,
                 headerRight:
                     <View style={styles.headerRightContainer}>
                         <TouchableOpacity style={styles.headerImageContainer}
                                           onPress={()=>{
-                                              console.log("WW",navigation.state.params.holder.props.dictStore.wordbook[0].title);
                                               navigation.state.params.holder.addWordPopup.show()
                                           }}
                         >
@@ -52,17 +50,17 @@ export default class WordbookScreen extends Component {
                                               switch (navigation.state.params.holder.state.flatListRenderType){
                                                   case WordbookScreen.RENDERTYPE_WORDBOOK:
                                                       navigation.state.params.holder.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOKMODIFY);
-                                                      this.settings.toggleButton(false);
+                                                      this.wordbookPageSettings.toggleButton(false);
                                                       break;
                                                   case WordbookScreen.RENDERTYPE_WORDBOOKMODIFY:
                                                       navigation.state.params.holder.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK);
-                                                      this.settings.toggleButton(true);
+                                                      this.wordbookPageSettings.toggleButton(true);
                                                       break;
                                               }
                                           }}
                         >
                             <SettingButton
-                                ref={comp => this.settings = comp}
+                                ref={comp => this.wordbookPageSettings = comp}
                                 style={styles.headerImage}/>
                         </TouchableOpacity>
                     </View>
@@ -81,6 +79,8 @@ export default class WordbookScreen extends Component {
             selectedWordbookID:-1,
         };
 
+        this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+        this.handleBackPress = this.handleBackPress.bind(this);
     }
 
     componentDidMount(){
@@ -92,22 +92,14 @@ export default class WordbookScreen extends Component {
             this.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK)
         );
 
+        this.setState({
+            flatListData: this.props.dictStore.wordbook,
+        });
+
         this.props.dictStore.addNewWordbook("TEST1");
         this.props.dictStore.addNewWordbook("TEST2");
         this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWordbook("TEST1");
-        this.props.dictStore.addNewWordbook("TEST2");
-        this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWordbook("TEST1");
-        this.props.dictStore.addNewWordbook("TEST2");
-        this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWordbook("TEST1");
-        this.props.dictStore.addNewWordbook("TEST2");
-        this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWordbook("TEST1");
-        this.props.dictStore.addNewWordbook("TEST2");
-        this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWord(0,"TEST31","SUPER");
+        this.props.dictStore.addNewWord(0,"lif","a");
         this.props.dictStore.wordbook[0].wordList[0].totalSolved=81;
         this.props.dictStore.wordbook[0].wordList[0].totalCorrect=31;
         this.props.dictStore.addNewWord(0,"TEST32","SUPER");
@@ -115,6 +107,7 @@ export default class WordbookScreen extends Component {
         this.props.dictStore.wordbook[0].wordList[1].totalCorrect=9;
         this.props.dictStore.addNewWord(0,"TEST33","SUPER");
         this.props.dictStore.addNewWord(2,"TEST34","SUPER");
+
     }
 
 
@@ -124,13 +117,11 @@ export default class WordbookScreen extends Component {
             case WordbookScreen.RENDERTYPE_WORDBOOK:
                 this.setState({
                     flatListRenderType: WordbookScreen.RENDERTYPE_WORDBOOK,
-                    flatListData: this.props.dictStore.wordbook,
                 });
                 break;
             case WordbookScreen.RENDERTYPE_WORDBOOKMODIFY:
                 this.setState({
                     flatListRenderType: WordbookScreen.RENDERTYPE_WORDBOOKMODIFY,
-                    flatListData: this.props.dictStore.wordbook,
                 });
                 break;
         }
@@ -147,6 +138,7 @@ export default class WordbookScreen extends Component {
                         onPress={()=>{
                             this.props.navigation.navigate('WordPage',{
                                 wordbookID:item.id,
+                                wordbookTitle:item.title,
                                 onGoBack: () => {
                                     this.setState({
                                         flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
@@ -192,6 +184,9 @@ export default class WordbookScreen extends Component {
         }
     }
 
+    handleBackPress(){
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -208,54 +203,73 @@ export default class WordbookScreen extends Component {
                     />
 
                 </View>
-                <LowerBar/>
-                <AddWordPopup
-                    ref={comp => this.addWordPopup = comp}
+                <LowerBar
+                    button1Pressed={()=>{
+                        this.props.navigation.navigate('TestScreen',{
+                            wordbookID:0,
+                        })
+                    }}
                 />
-                <PopupDialog
-                    width={250}
-                    height={150}
-                    ref={comp => this.deletePopup = comp}>
-                    <View style={styles.deletePopupContainer}>
-                        <View style={{flex:1}}/>
-                        <Text style={styles.deletePopupText}>정말 단어장을 삭제할거에요?</Text>
-                        <View style={{flex:1}}/>
-                        <View style={{height:40,flexDirection:'row'}}>
-                            <TouchableOpacity style={[styles.deletePopupButton,{
-                                // borderTopLeftRadius:10,
-                                borderBottomLeftRadius:5,
-                                backgroundColor:'#35466A',
-                            }]}
-                                              onPress={()=>{
-                                                  this.props.dictStore.deleteWordbook(this.state.selectedWordbookID);
-                                                  this.setState({
-                                                      flatListRenderType:WordbookScreen.MODIFY_NEEDED_MODIFY,
-                                                      selectedWordbookID:-1,
-                                                  });
-                                                  this.deletePopup.dismiss();
-                                              }}
-                            >
-                                <Text style={styles.deletePopupButtonText}>삭제</Text>
-                            </TouchableOpacity>
-                            <View style={{width:1}}/>
-                            <TouchableOpacity style={[styles.deletePopupButton,{
-                                // borderTopRightRadius:10,
-                                borderBottomRightRadius:5,
-                                backgroundColor:'#35466A',
-                            }]}
-                                              onPress={()=>{this.deletePopup.dismiss()}}
-                            >
-                                <Text style={styles.deletePopupButtonText}>취소</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </PopupDialog>
+                <AddWordPopup
+                    ref={comp=>this.addWordPopup = comp}
+                    style={{width:screen.width,height:150}}
+                    onAddNewFolder={()=>{
+                        this.props.navigation.navigate('AddNewFolder',{
+                            onGoBack:()=>{
+                                this.addWordPopup.close();
+                                this.setState({
+                                    flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
+                                });
+                            }
+                        })
+                    }}
+                    onAddNewWord={()=>{
+                        this.props.navigation.navigate('AddNewWord',{
+                            onGoBack:()=>{
+                                this.addWordPopup.close();
+                                this.setState({
+                                    flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
+                                });
+                            }
+                        })
+                    }}
+                />
+                <YesNoPopup
+                    ref={comp => this.deletePopup = comp}
+                    style={{width:250,height:150}}
+                    title={"정말 단어장을 삭제하시겠습니까?"}
+                    left={"삭제"}
+                    right={"취소"}
+                    leftClicked={()=>{
+                        if(this.props.dictStore.wordbook.length===1){
+                            this.deletePopup.close();
+                            Alert.alert(
+                                '앗!',
+                                '단어장을 전부 다 지우면 안돼요!',
+                                [
+                                    {text: 'OK', onPress: () => console.log('OK Pressed') },
+                                ]
+                            );
+                            return;
+                        }
+                        this.props.dictStore.deleteWordbook(this.state.selectedWordbookID);
+                        this.setState({
+                            flatListRenderType:WordbookScreen.MODIFY_NEEDED_MODIFY,
+                            selectedWordbookID:-1,
+                        });
+                        this.deletePopup.close();
+                    }}
+                    rightClicked={()=>{
+                        this.deletePopup.close();
+                    }}
+
+                />
             </View>
         );
     }
 }
 
-
+@inject("dictStore")
 class WordbookView extends Component {
     /**
      * props:
@@ -286,6 +300,7 @@ class WordbookView extends Component {
     }
 }
 
+@inject("dictStore")
 class WordbookModifyView extends Component {
     /**
      * props:
@@ -355,24 +370,6 @@ const styles = StyleSheet.create({
     },
 
 
-    deletePopupContainer:{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center',
-    },
-    deletePopupText:{
-        justifyContent:'center',
-        textAlign:'center',
-    },
-    deletePopupButton:{
-        flex:1,
-        justifyContent:'center',
-        alignItems:'center',
-    },
-    deletePopupButtonText:{
-        textAlign:'center',
-        color:'white'
-    }
 });
 
 const wordbookViewStyles = StyleSheet.create({

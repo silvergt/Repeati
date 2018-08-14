@@ -43,19 +43,19 @@ export default class LowerBar extends Component {
                 <View style={styles.container}>
                     <TouchableOpacity
                         style={styles.button1}
-                        onPress={()=>this.onButton1Pressed}>
+                        onPress={()=>this.onButton1Pressed()}>
                         <Text style={styles.innerText}>시험 시작</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button2}
-                        onPress={()=>this.onButton2Pressed}>
-                        <Text style={styles.innerText}>게임</Text>
+                        onPress={()=>this.onButton2Pressed()}>
+                        <Text style={styles.innerText}>빠른 검색</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                    style={styles.button3}
-                    onPress={()=>this.onButton3Pressed}>
-                        <Text style={styles.innerText}>마이페이지</Text>
-                </TouchableOpacity>
+                    {/*<TouchableOpacity*/}
+                    {/*style={styles.button3}*/}
+                    {/*onPress={()=>this.onButton3Pressed}>*/}
+                        {/*<Text style={styles.innerText}>마이페이지</Text>*/}
+                {/*</TouchableOpacity>*/}
                 </View>
             </View>
         );
