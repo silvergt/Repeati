@@ -100,6 +100,9 @@ export default class WordbookScreen extends Component {
         this.props.dictStore.addNewWordbook("TEST2");
         this.props.dictStore.addNewWordbook("TEST3");
         this.props.dictStore.addNewWord(0,"lif","a");
+        this.props.dictStore.addNewWord(0,"number2","2");
+        this.props.dictStore.addNewWord(0,"num3","3");
+        this.props.dictStore.addNewWord(0,"num4","4");
         this.props.dictStore.wordbook[0].wordList[0].totalSolved=81;
         this.props.dictStore.wordbook[0].wordList[0].totalCorrect=31;
         this.props.dictStore.addNewWord(0,"TEST32","SUPER");
@@ -349,7 +352,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor:'white',
+        backgroundColor:'#EEEEEE',
     },
     flatList:{
         flex:1,

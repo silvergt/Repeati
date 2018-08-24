@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
         height:lowerBarHeight,
         paddingLeft:15,
         paddingRight:15,
+        backgroundColor:'white'
     },
     shadow:{
         height:1,

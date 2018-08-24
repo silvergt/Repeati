@@ -28,12 +28,21 @@ export default class WordPage extends Component {
     static MODIFY_NEEDED_WORD = "MODIFY_NEEDED_WORD";      //변경은 없지만 RENDERTYPE_WORD로 리렌더링이 필요할 때
     static MODIFY_NEEDED_WORDMODIFY = "MODIFY_NEEDED_WORDMODIFY";      //변경은 없지만 MODIFY_NEEDED_WORDMODIFY으로 리렌더링이 필요할 때
 
+    /**
+     *
+     * @param navigation
+     * wordbookTitle
+     * wordbookID
+     * onGoBack()
+     */
+
+
     static navigationOptions =({navigation}) =>{
         return(
             {
                 headerTitle:
                     <Text resizeMode="contain" style={{color:'black',}}>
-                        {navigation.state.params.wordbookTitle ? navigation.state.params.wordbookTitle : "단어장"}
+                        단어장 : {navigation.state.params.wordbookTitle}
                         </Text>,
                 headerLeft:
                     <TouchableOpacity
