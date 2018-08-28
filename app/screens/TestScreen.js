@@ -93,10 +93,12 @@ export default class TestScreen extends Component {
         this.addWordListIntoCards();
     }
 
+    clearWordList(){
+        this.cardList = [];
+    }
+    
     addWordListIntoCards(){
         let wordbookTemp = this.props.dictStore.getWordbookById(this.wordbookID);
-
-        console.log("q",wordbookTemp.wordList.length);
 
         const shuffledWordList = this.shuffleLists(wordbookTemp.wordList);
 
@@ -108,7 +110,6 @@ export default class TestScreen extends Component {
     }
 
     shuffleLists(arr){
-        console.log("MOMO",arr);
         let len = arr.length;
         if(len === 1)return arr;
         let i = len * 10;
@@ -144,10 +145,10 @@ export default class TestScreen extends Component {
     }
 
     getSelectedWordbookTitle(){
-        if(this.state.wordbookID === undefined || this.state.wordbookID === -1){
+        if(this.wordbookID === undefined || this.wordbookID === -1){
             return "단어장";
         }else{
-            return this.props.dictStore.getWordbookById(this.state.wordbookID).title;
+            return this.props.dictStore.getWordbookById(this.wordbookID).title;
         }
     }
 
@@ -159,12 +160,21 @@ export default class TestScreen extends Component {
             <View style={styles.container}>
                 <View style={styles.container}>
                     <Swiper
-                        style={{height:200}}
+                        ref={comp => this.swiper = comp}
                         backgroundColor={'transparent'}
+                        stackSize={3}
                         cards={this.cardList}
+                        disableBottomSwipe={true}
+                        disableTopSwipe={true}
                         renderCard={(card) =>{
                             return(
-                                <Text style={{margin:20,height:150,backgroundColor:'white'}}>{card.word}</Text>
+                                <View>
+                                    <View style={{height:100,}}/>
+                                    <Card style={cardStyles.container}
+                                          word={card}
+                                          testType={this.state.testType}
+                                    />
+                                </View>
                             )
                         }}/>
                     <View style={{justifyContent:'center',flexDirection:'row',marginTop:20}}>
@@ -216,9 +226,8 @@ export default class TestScreen extends Component {
                                 style={selectStyles.itemContainer}
                                 onPress={()=>{
                                     this.selectWordbookPopup.close();
-                                    this.setState({
-                                        wordbookID:item.id,
-                                    })
+                                    this.wordbookID = item.id;
+                                    this.setState({})
                                 }}
                             >
                                 <Text style={selectStyles.itemTitle}>{item.title}</Text>
@@ -255,11 +264,29 @@ export default class TestScreen extends Component {
 class Card extends Component{
     /**
      * @params;
+     * style
      * word
+     * testType
      */
 
-    render(){
+    constructor(){
+        super();
 
+        this.state={
+            answerIsVisible : false,
+        }
+    }
+
+    render(){
+        let hint = this.props.testType === TestScreen.TESTTYPE_ENG_TO_KOR ?
+            this.props.word.word : this.props.word.mean;
+
+        return(
+            <View style={this.props.style}>
+                <Text>{hint}</Text>
+                <Text>{this.props.word.mean}</Text>
+            </View>
+        )
     }
 }
 
@@ -305,7 +332,7 @@ const styles = StyleSheet.create({
     },
     lowerButton:{
         justifyContent:'center',
-        height:50,
+        height:80,
     },
     lowerButtonText:{
         color:'black',
@@ -333,4 +360,18 @@ const selectStyles = StyleSheet.create({
         width:screen.width-50,
         height:200
     },
+});
+
+const cardStyles = StyleSheet.create({
+    container:{
+        width:screen.width-50,
+        height:screen.height/2,
+        alignSelf:'center',
+        alignItems:'center',
+        justifyContent:'center',
+        backgroundColor:'white',
+        borderRadius:10,
+        borderWidth:1,
+        borderColor:'#427677',
+    }
 });
