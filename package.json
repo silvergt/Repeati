@@ -13,6 +13,7 @@
     "react-native": "0.56.0",
     "react-native-deck-swiper": "^1.5.17",
     "react-native-keyboard-aware-scroll-view": "^0.6.0",
+    "react-native-fast-image": "^4.0.14",
     "react-native-modalbox": "^1.6.0",
     "react-navigation": "2.0.1"
   },

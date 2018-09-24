@@ -142,6 +142,21 @@ export class DictionaryStore {
         })
     }
 
+    setWordSolvedCount(wordbookID,wordID,correct){
+        this.wordbook.map((wordbook)=>{
+            if(wordbook.id === wordbookID){
+                for(let i=0;i<wordbook.wordList.length;i++){
+                    if(wordbook.wordList[i].id === wordID){
+                        wordbook.wordList[i].totalSolved = wordbook.wordList[i].totalSolved + 1;
+                        if(correct){
+                            wordbook.wordList[i].totalCorrect = wordbook.wordList[i].totalCorrect + 1;
+                        }
+                    }
+                }
+            }
+        })
+    }
+
     clear(){
         this.wordbookID = 0;
         this.wordID = 0;

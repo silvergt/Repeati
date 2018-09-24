@@ -10,12 +10,12 @@ import ReactNative, {
     View,
     Text,
     TouchableOpacity,
-    Image,
     TextInput,
     Dimensions,
     Alert,
     Keyboard,
 } from 'react-native';
+import Image from 'react-native-fast-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import {inject,observer} from 'mobx-react'
 import RecommendedWord from "../components/RecommendedWord";
@@ -31,7 +31,9 @@ export default class AddNewWord extends Component {
     static navigationOptions = ({navigation}) =>{
         return(
             {
-
+                headerStyle: {
+                    backgroundColor: "#fff",
+                },
                 headerTitle:
                     <Text>단어 추가</Text>,
                 headerLeft:
@@ -55,7 +57,7 @@ export default class AddNewWord extends Component {
                             alignItems:'center',
                         }}
                         onPress={()=>{navigation.state.params.holder.onClickedComplete()}}>
-                        <Text>완료</Text>
+                        <Text>추가</Text>
                     </TouchableOpacity>
 
             }
@@ -179,13 +181,13 @@ export default class AddNewWord extends Component {
                             <Text style={styles.folderSelectFolderText}>{this.getSelectedWordbookTitle()}</Text>
                         </TouchableOpacity>
                     </View>
+                    <View style={{height:20}}/>
                     <Text style={styles.plainText}>영어 단어</Text>
                     <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
-                            ref={comp=>this.textInput=comp}
+                            ref={comp=>this.wordInput=comp}
                             style={styles.wordbookTextInput}
-                            multiline={true}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
@@ -196,18 +198,34 @@ export default class AddNewWord extends Component {
                         <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
                     </View>
 
-                    <View style={{height:120}}>
-                        {recommendedWords}
-                    </View>
+                    {recommendedWords}
 
-                    <View style={{height:screen.width/4}}/>
+                    <View style={{height:screen.width/4,justifyContent:'center'}}>
+                        <TouchableOpacity
+                            style={styles.swapContainer}
+                            activeOpacity={0.8}
+                            onPress={()=>{
+                                this.onChangeWordTextInput(this.state.newWordMean);
+                                this.setState({
+                                    newWordMean:this.state.newWordTitle,
+                                    newWordTitle:this.state.newWordMean,
+                                })
+                            }}
+                        >
+                            <Image
+                                style={styles.swapImage}
+                                source={require("../res/images/swap.png")}
+                                resizeMode={Image.resizeMode.contain}
+                            />
+                        </TouchableOpacity>
+                    </View>
 
                     <Text style={styles.plainText}>뜻(클릭해 직접 수정하세요)</Text>
                     <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
+                            ref={comp=>this.meanInput=comp}
                             style={styles.wordbookTextInput}
-                            multiline={true}
                             maxLength={50}
                             blurOnSubmit={true}
                             returnKeyType='done'
@@ -305,6 +323,17 @@ const styles = StyleSheet.create({
         color:'white',
         alignSelf:'center',
         fontSize:17,
+    },
+    swapContainer:{
+        width:50,
+        height:50,
+        justifyContent:'center',
+        alignItems:'center',
+        alignSelf:'center'
+    },
+    swapImage:{
+        width:30,
+        height:30,
     }
 });
 

@@ -26,7 +26,9 @@ export default class ReviseWordbook extends Component {
     static navigationOptions =({navigation}) =>{
         return(
             {
-
+                headerStyle: {
+                    backgroundColor: "#fff",
+                },
                 headerTitle:
                     <Text>단어장 수정</Text>,
                 headerLeft:

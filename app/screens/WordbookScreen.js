@@ -33,6 +33,11 @@ export default class WordbookScreen extends Component {
     static navigationOptions =({navigation}) =>{
         return(
             {
+
+                headerStyle: {
+                    backgroundColor: "#fff",
+                    textAlign:'center',
+                },
                 headerTitle:
                     <Text style={{color:'black'}}>{appName}</Text>,
                 headerRight:
@@ -211,6 +216,17 @@ export default class WordbookScreen extends Component {
                         this.props.navigation.navigate('TestScreen',{
                             wordbookID:0,
                         })
+                    }}
+                    button2Pressed={()=>{
+                        this.props.navigation.navigate('InstantSearchScreen',{
+                            onGoBack:()=>{
+                                if(this.state.flatListRenderType===WordbookScreen.RENDERTYPE_WORDBOOKMODIFY){
+                                    this.setState({flatListRenderType:WordbookScreen.MODIFY_NEEDED_MODIFY});
+                                }else{
+                                    this.setState({flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK});
+                                }
+                            }
+                        });
                     }}
                 />
                 <AddWordPopup

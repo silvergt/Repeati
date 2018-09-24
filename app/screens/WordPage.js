@@ -18,6 +18,7 @@ import AddWordPopup from "../components/AddWordPopup";
 import SettingButton from "../components/SettingButton"
 import YesNoPopup from "../components/YesNoPopup";
 import {toJS} from 'mobx'
+import WordbookScreen from "./WordbookScreen";
 
 
 @inject("dictStore")
@@ -40,6 +41,9 @@ export default class WordPage extends Component {
     static navigationOptions =({navigation}) =>{
         return(
             {
+                headerStyle: {
+                    backgroundColor: "#fff",
+                },
                 headerTitle:
                     <Text resizeMode="contain" style={{color:'black',}}>
                         단어장 : {navigation.state.params.wordbookTitle}
@@ -116,10 +120,12 @@ export default class WordPage extends Component {
             holder:this,
         });
 
+        this.wordbookID = this.props.navigation.getParam('wordbookID',-1);
+
         this.setRenderMode(WordPage.RENDERTYPE_WORD);
 
         this.setState({
-            flatListData: this.props.dictStore.wordbook[this.props.navigation.getParam('wordbookID',-1)].wordList,
+            flatListData: this.props.dictStore.wordbook[this.props.dictStore.getWordbookIndexById(this.wordbookID)].wordList,
         });
     }
 
@@ -220,7 +226,24 @@ export default class WordPage extends Component {
                     />
 
                 </View>
-                <LowerBar/>
+                <LowerBar
+                    button1Pressed={()=>{
+                        this.props.navigation.navigate('TestScreen',{
+                            wordbookID:0,
+                        })
+                    }}
+                    button2Pressed={()=>{
+                        this.props.navigation.navigate('InstantSearchScreen',{
+                            onGoBack:()=>{
+                                if(this.state.flatListRenderType===WordPage.RENDERTYPE_WORDMODIFY){
+                                    this.setState({flatListRenderType:WordPage.MODIFY_NEEDED_WORDMODIFY});
+                                }else{
+                                    this.setState({flatListRenderType:WordPage.MODIFY_NEEDED_WORD});
+                                }
+                            }
+                        });
+                    }}
+                />
                 <AddWordPopup
                     ref={comp=>this.addWordPopup = comp}
                     onAddNewFolder={()=>{

@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, {Component} from 'react';
 import ReactNative, {
     StyleSheet,
@@ -14,11 +8,11 @@ import ReactNative, {
     Dimensions,
     Alert,
     Keyboard,
+    Platform
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-import {inject,observer} from 'mobx-react'
-import {toJS} from 'mobx'
+import {inject} from 'mobx-react'
 import RecommendedWord from "../components/RecommendedWord";
 import {getMeaning} from "../functions/dictionary";
 import SelectListPopup from "../components/SelectListPopup";
@@ -26,46 +20,30 @@ import SelectListPopup from "../components/SelectListPopup";
 const screen = Dimensions.get('window');
 
 @inject("dictStore")
-@observer
-export default class ReviseWord extends Component {
+export default class InstantSearchScreen extends Component {
 
-    static navigationOptions =({navigation}) =>{
+    static navigationOptions= ({navigation}) => {
         return(
             {
                 headerStyle: {
                     backgroundColor: "#fff",
                 },
                 headerTitle:
-                    <Text>단어 수정</Text>,
+                    <Text resizeMode="contain" style={{color:'black',}}>
+                        빠른 검색
+                    </Text>,
                 headerLeft:
-                    <TouchableOpacity style={
-                        {
+                    <TouchableOpacity
+                        style={{
                             width:50,
                             height:'100%',
                             justifyContent:'center',
                             alignItems:'center',
-
-                        }
-                    }
-                                      onPress={()=>{navigation.goBack()}}
+                        }}
+                        onPress={()=>{navigation.goBack()}}
                     >
                         <Image style={{width:20,height:20}} source={require("../res/images/back.png")}/>
                     </TouchableOpacity>,
-                headerRight:
-                    <TouchableOpacity style={
-                        {
-                            width:50,
-                            height:'100%',
-                            justifyContent:'center',
-                            alignItems:'center',
-
-                        }
-                    }
-
-                                      onPress={()=>{navigation.state.params.holder.onClickedComplete()}}>
-                        <Text>완료</Text>
-                    </TouchableOpacity>
-
             }
         )
     };
@@ -73,34 +51,16 @@ export default class ReviseWord extends Component {
     constructor(){
         super();
         this.state={
-            wordbookID:-1,
-            retrievedWord:{},
-            revisedWordbookID:-1,
-            revisedWordTitle:"",
-            revisedWordMean:"",
+            newWordTitle:"",
+            newWordMean:"",
 
             recommendedWords:[],
         };
-        this.onClickedComplete = this.onClickedComplete.bind(this);
+        this.onClickAddWord = this.onClickAddWord.bind(this);
     }
 
-    componentDidMount(){
-        this.props.navigation.setParams({
-            holder:this,
-        });
-
-        this.onChangeWordTextInput(this.props.navigation.getParam('word').word);
-
-        this.setState({
-            wordbookID:this.props.navigation.getParam('wordbookID',-1),
-            retrievedWord:this.props.navigation.getParam('word'),
-            revisedWordTitle:this.props.navigation.getParam('word').word,
-            revisedWordMean:this.props.navigation.getParam('word').mean,
-        });
-    }
-
-    onClickedComplete(){
-        if(this.state.revisedWordTitle === "" || this.state.revisedWordMean === ""){
+    onClickAddWord(selectedWordbookID){
+        if(this.state.newWordTitle === "" || this.state.newWordMean === ""){
             Alert.alert(
                 '앗!',
                 '영어단어와 뜻을 모두 입력해주세요!',
@@ -111,63 +71,44 @@ export default class ReviseWord extends Component {
             return;
         }
 
-        if(this.state.revisedWordbookID !== -1 && this.state.revisedWordbookID !== this.state.wordbookID){
-            //단어가 저장된 폴더가 바꼈을 경우
-            this.props.dictStore.deleteWord(this.state.wordbookID,this.state.retrievedWord.id);
-            this.props.dictStore.addNewWord(this.state.revisedWordbookID,this.state.revisedWordTitle,this.state.revisedWordMean);
-        }else{
-            //단어가 저장된 폴더가 그대로일 경우
-            this.props.dictStore.reviseWord(this.state.wordbookID,this.state.retrievedWord.id,
-                this.state.revisedWordTitle,this.state.revisedWordMean);
-        }
+        this.props.dictStore.addNewWord(selectedWordbookID,this.state.newWordTitle,this.state.newWordMean);
 
         let goBackListener = this.props.navigation.getParam('onGoBack',-1);
         goBackListener();
 
+        this.selectWordbookPopup.close();
         this.props.navigation.goBack();
+
     }
 
     onChangeWordTextInput(text){
         this.setState({
-            revisedWordTitle:text,
+            newWordTitle: text
         });
+
         getMeaning(text).then((wordListTemp)=>{
-            var recommendedWordTemp = [];
+            let recommendedWordTemp = [];
             const maxLength = wordListTemp.length < 3 ? wordListTemp.length : 3;
             for(let i=0;i<maxLength;i++){
                 recommendedWordTemp.push(wordListTemp[i]);
             }
             this.setState({
-                recommendedWords:recommendedWordTemp,
+                recommendedWords: recommendedWordTemp,
             })
         });
-
     }
 
     openWordbookSelectPopup(){
         this.selectWordbookPopup.show();
     }
 
-    getSelectedWordbookTitle(){
-        if(this.state.wordbookID === undefined || this.state.wordbookID === -1){return "단어장"}
-        if(this.state.revisedWordbookID !== -1 && this.state.revisedWordbookID !== this.state.wordbookID){
-            //단어가 저장된 폴더가 바꼈을 경우
-            return this.props.dictStore.getWordbookById(this.state.revisedWordbookID).title;
-        }else{
-            //단어가 저장된 폴더가 그대로일 경우
-            return this.props.dictStore.getWordbookById(this.state.wordbookID).title;
-        }
-    }
-
     scrollToInput (reactNode: any) {
         this.scroll.scrollToFocusedInput(reactNode)
     }
 
-
-
     render() {
 
-        var recommendedWords=[];
+        let recommendedWords=[];
         for(let i=0;i<this.state.recommendedWords.length;i++){
             recommendedWords.push(
                 <RecommendedWord
@@ -176,8 +117,8 @@ export default class ReviseWord extends Component {
                     mean={this.state.recommendedWords[i].mean}
                     onSelected={(word,mean)=>{
                         this.setState({
-                            revisedWordTitle:word,
-                            revisedWordMean:mean,
+                            newWordTitle:word,
+                            newWordMean:mean,
                             recommendedWords:[],
                         });
                         Keyboard.dismiss();
@@ -186,35 +127,33 @@ export default class ReviseWord extends Component {
             )
         }
 
+
         return (
-            <View style={styles.container}>
+            <View
+                style={[styles.container,{justifyContent:'center',}]}
+            >
                 <KeyboardAwareScrollView
                     style={styles.container}
                     ref={ref => {this.scroll = ref}}
                     keyboardShouldPersistTaps={'always'}
                     keyboardDismissMode={'on-drag'}
                 >
-                    <View style={{height:screen.width/6,justifyContent:'center',flexDirection:'row'}}>
-                        <Text style={styles.folderSelectText}>폴더 선택 :</Text>
-                        <TouchableOpacity
-                            style={styles.folderSelectBox}
-                            onPress={()=>{this.openWordbookSelectPopup()}}>
-                            <Text style={styles.folderSelectFolderText}>{this.getSelectedWordbookTitle()}</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <View
+                        style={{height:60}}
+                    />
                     <Text style={styles.plainText}>영어 단어</Text>
                     <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
+                            ref={comp=>this.textInput=comp}
                             style={styles.wordbookTextInput}
-                            multiline={true}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
                             autoCorrect={false}
-                            value={this.state.revisedWordTitle}
-                            onChangeText={(text)=>{this.onChangeWordTextInput(text)}}
-                        />
+                            underlineColorAndroid={"#FFFFFF"}
+                            value={this.state.newWordTitle}
+                            onChangeText={(text)=>{this.onChangeWordTextInput(text)}}/>
                         <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
                     </View>
 
@@ -225,10 +164,10 @@ export default class ReviseWord extends Component {
                             style={styles.swapContainer}
                             activeOpacity={0.8}
                             onPress={()=>{
-                                this.onChangeWordTextInput(this.state.revisedWordMean);
+                                this.onChangeWordTextInput(this.state.newWordMean);
                                 this.setState({
-                                    revisedWordMean:this.state.revisedWordTitle,
-                                    revisedWordTitle:this.state.revisedWordMean,
+                                    newWordMean:this.state.newWordTitle,
+                                    newWordTitle:this.state.newWordMean,
                                 })
                             }}
                         >
@@ -239,19 +178,17 @@ export default class ReviseWord extends Component {
                             />
                         </TouchableOpacity>
                     </View>
-
                     <Text style={styles.plainText}>뜻(클릭해 직접 수정하세요)</Text>
                     <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             style={styles.wordbookTextInput}
-                            multiline={true}
                             maxLength={50}
                             blurOnSubmit={true}
                             returnKeyType='done'
                             autoCorrect={false}
-                            value={this.state.revisedWordMean}
-                            onChangeText={(text)=>{this.setState({revisedWordMean:text})}}
+                            value={this.state.newWordMean}
+                            onChangeText={(text)=>{this.setState({newWordMean:text})}}
                             onFocus={(event: Event) => {
                                 // `bind` the function if you're using ES6 classes
                                 this.scrollToInput(ReactNative.findNodeHandle(event.target))
@@ -259,12 +196,19 @@ export default class ReviseWord extends Component {
                         />
                         <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
                     </View>
+                    <View style={{height:50}}/>
                 </KeyboardAwareScrollView>
-                {/*<TouchableOpacity  style={styles.lowerButton}*/}
-                                   {/*onPress={()=>{this.onClickedComplete()}}*/}
-                {/*>*/}
-                    {/*<Text style={styles.lowerButtonText}>수정 완료</Text>*/}
-                {/*</TouchableOpacity>*/}
+
+                <TouchableOpacity
+                    style={styles.addToWordbookContainer}
+                    activeOpacity={0.8}
+                    onPress={()=>{
+                        this.openWordbookSelectPopup();
+                    }}
+                >
+                    <Text style={styles.addToWordbookText}>단어장에 추가!</Text>
+                </TouchableOpacity>
+
                 <SelectListPopup
                     style={selectStyles.selectWordbookPopup}
                     ref={comp=>this.selectWordbookPopup = comp}
@@ -275,10 +219,7 @@ export default class ReviseWord extends Component {
                             <TouchableOpacity
                                 style={selectStyles.itemContainer}
                                 onPress={()=>{
-                                    this.selectWordbookPopup.close();
-                                    this.setState({
-                                        revisedWordbookID:item.id,
-                                    })
+                                    this.onClickAddWord(item.id);
                                 }}
                             >
                                 <Text style={selectStyles.itemTitle}>{item.title}</Text>
@@ -323,25 +264,14 @@ const styles = StyleSheet.create({
         textAlign:'center',
         justifyContent:'center',
         alignSelf:'center',
-        fontSize:20,
-        marginBottom:5,
+        fontSize:Platform.OS === 'ios' ? 20 : 16,
         paddingLeft:20,
-        paddingRight:20
+        paddingRight:20,
     },
     plainText:{
         color:"#427677",
-        fontSize:16,
+        fontSize:Platform.OS === 'ios' ? 16 : 12,
         alignSelf:'center',
-    },
-    lowerButton:{
-        justifyContent:'center',
-        backgroundColor:'#344768',
-        height:50,
-    },
-    lowerButtonText:{
-        color:'white',
-        alignSelf:'center',
-        fontSize:17,
     },
     swapContainer:{
         width:50,
@@ -353,6 +283,16 @@ const styles = StyleSheet.create({
     swapImage:{
         width:30,
         height:30,
+    },addToWordbookContainer:{
+        justifyContent:'center',
+        alignSelf:'stretch',
+        alignItems:'center',
+        backgroundColor:"#344768",
+        height:60,
+    },
+    addToWordbookText:{
+        color:'white',
+        fontSize:Platform.OS === 'ios' ? 17 : 14,
     }
 });
 
@@ -370,3 +310,4 @@ const selectStyles = StyleSheet.create({
         textAlign:'center',
     }
 });
+

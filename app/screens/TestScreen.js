@@ -10,21 +10,18 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Image,
     TextInput,
     Dimensions,
-    Alert
+    Alert, Animated
 } from 'react-native';
+import Image from 'react-native-fast-image';
 import Swiper from 'react-native-deck-swiper'
 import {inject,observer} from 'mobx-react'
-import RecommendedWord from "../components/RecommendedWord";
-import {getMeaning} from "../functions/dictionary";
 import SelectListPopup from "../components/SelectListPopup";
 
 const screen = Dimensions.get('window');
 
 @inject("dictStore")
-@observer
 export default class TestScreen extends Component {
     static TESTTYPE_ENG_TO_KOR = "영어 보고 뜻 맞추기"; //영어보고 한글맞추기
     static TESTTYPE_KOR_TO_ENG = "뜻 보고 영단어 맞추기"; //한글보고 영어맞추기
@@ -41,7 +38,10 @@ export default class TestScreen extends Component {
     static navigationOptions = ({navigation}) =>{
         return(
             {
-
+                headerStyle: {
+                    backgroundColor: "#fff",
+                    borderBottomWidth: 0,
+                },
                 headerTitle:
                     <Text>단어 시험</Text>,
                 headerLeft:
@@ -59,13 +59,13 @@ export default class TestScreen extends Component {
                 headerRight:
                     <TouchableOpacity
                         style={{
-                            width:50,
+                            width:80,
                             height:'100%',
                             justifyContent:'center',
                             alignItems:'center',
                         }}
                         onPress={()=>{navigation.state.params.holder.onClickedComplete()}}>
-                        <Text>종료</Text>
+                        <Text>점수확인</Text>
                     </TouchableOpacity>
 
             }
@@ -80,6 +80,9 @@ export default class TestScreen extends Component {
         };
         this.wordbookID = 0;
         this.cardList = [];
+        this.totalSolved = 0;
+        this.totalCorrect = 0;
+
         this.onClickedComplete = this.onClickedComplete.bind(this);
     }
 
@@ -95,6 +98,13 @@ export default class TestScreen extends Component {
 
     clearWordList(){
         this.cardList = [];
+    }
+
+    changeWordbook(wordbookID){
+        this.wordbookID = wordbookID;
+
+        this.clearWordList();
+        this.addWordListIntoCards();
     }
     
     addWordListIntoCards(){
@@ -125,15 +135,14 @@ export default class TestScreen extends Component {
             i--;
         }
         return arr;
-
-
     }
 
     onClickedComplete(){
-        let goBackListener = this.props.navigation.getParam('onGoBack',-1);
-        goBackListener();
-
         this.props.navigation.goBack();
+        this.props.navigation.navigate("TestScoreScreen",{
+            totalSolved : this.totalSolved,
+            totalCorrect : this.totalCorrect,
+        });
     }
 
     openWordbookSelectPopup(){
@@ -166,35 +175,68 @@ export default class TestScreen extends Component {
                         cards={this.cardList}
                         disableBottomSwipe={true}
                         disableTopSwipe={true}
-                        renderCard={(card) =>{
+                        onTapCard={(index) => {
+                            this.lastTappedIndex = index;
+                        }}
+                        renderCard={(card,index) =>{
                             return(
                                 <View>
                                     <View style={{height:100,}}/>
-                                    <Card style={cardStyles.container}
-                                          word={card}
-                                          testType={this.state.testType}
+                                    <Card
+                                        style={cardStyles.container}
+                                        word={card}
+                                        testType={this.state.testType}
+                                        navigation={this.props.navigation}
+                                        onClicked={()=>{
+                                            this.lastTappedIndex = index;
+                                        }}
                                     />
                                 </View>
                             )
-                        }}/>
-                    <View style={{justifyContent:'center',flexDirection:'row',marginTop:20}}>
-                        <Text style={styles.folderSelectText}>단어장 선택 :</Text>
-                        <TouchableOpacity
-                            style={styles.folderSelectBox}
-                            onPress={()=>{this.openWordbookSelectPopup()}}
-                        >
-                            <Text style={styles.folderSelectFolderText}>{this.getSelectedWordbookTitle()}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={{height:20}}/>
-                    <View style={{justifyContent:'center',flexDirection:'row'}}>
-                        <Text style={styles.folderSelectText}>시험 방식 :</Text>
-                        <TouchableOpacity
-                            style={styles.folderSelectBox}
-                            onPress={()=>{this.openTestTypeSelectPopup()}}
-                        >
-                            <Text style={styles.folderSelectFolderText}>{this.state.testType}</Text>
-                        </TouchableOpacity>
+                        }}
+                        onSwipedLeft={(index)=>{
+                            if(index !== this.lastTappedIndex){
+                                Alert.alert("모르는 단어는\n뜻을 알고 가는게 좋아요!");
+                            }
+                            this.props.dictStore.setWordSolvedCount(this.wordbookID,this.cardList[index].id,false);
+                            this.totalSolved += 1;
+
+                            if(this.cardList.length - index < 3){
+                                this.addWordListIntoCards();
+                            }
+                        }}
+                        onSwipedRight={(index)=>{
+                            this.props.dictStore.setWordSolvedCount(this.wordbookID,this.cardList[index].id,true);
+                            this.totalSolved += 1;
+                            this.totalCorrect += 1;
+
+                            if(this.cardList.length - index < 3){
+                                this.addWordListIntoCards();
+                            }
+                        }}
+                    />
+                    <View style={styles.upperOptionContainer}>
+                        <View style={{justifyContent:'center',flexDirection:'row'}}>
+                            <Text style={styles.folderSelectText}>단어장 선택 :</Text>
+                            <TouchableOpacity
+                                style={styles.folderSelectBox}
+                                activeOpacity={0.8}
+                                onPress={()=>{this.openWordbookSelectPopup()}}
+                            >
+                                <Text style={styles.folderSelectFolderText}>{this.getSelectedWordbookTitle()}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{height:15}}/>
+                        <View style={{justifyContent:'center',flexDirection:'row'}}>
+                            <Text style={styles.folderSelectText}>시험 방식 :</Text>
+                            <TouchableOpacity
+                                style={styles.folderSelectBox}
+                                activeOpacity={0.8}
+                                onPress={()=>{this.openTestTypeSelectPopup()}}
+                            >
+                                <Text style={styles.folderSelectFolderText}>{this.state.testType}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     <View style={{
                         flexDirection:'row',
@@ -203,11 +245,23 @@ export default class TestScreen extends Component {
                         position:'absolute',
                         bottom:0
                     }}>
-                        <TouchableOpacity style={styles.lowerButton}>
+                        <TouchableOpacity
+                            style={styles.lowerButton}
+                            activeOpacity={0.8}
+                            onPress={()=>{
+                                this.swiper.swipeLeft();
+                            }}
+                        >
                             <Text style={[styles.lowerButtonText,{color:'red'}]}>{"<"} 모르는 단어</Text>
                         </TouchableOpacity>
                         <View style={{flex:1}}/>
-                        <TouchableOpacity style={styles.lowerButton}>
+                        <TouchableOpacity
+                            style={styles.lowerButton}
+                            activeOpacity={0.8}
+                            onPress={()=>{
+                                this.swiper.swipeRight();
+                            }}
+                        >
                             <Text style={[styles.lowerButtonText,{color:'green'}]}>아는 단어 {">"}</Text>
                         </TouchableOpacity>
                     </View>
@@ -224,10 +278,11 @@ export default class TestScreen extends Component {
                         return(
                             <TouchableOpacity
                                 style={selectStyles.itemContainer}
+                                activeOpacity={0.8}
                                 onPress={()=>{
                                     this.selectWordbookPopup.close();
-                                    this.wordbookID = item.id;
-                                    this.setState({})
+                                    this.changeWordbook(item.id);
+                                    this.setState({});
                                 }}
                             >
                                 <Text style={selectStyles.itemTitle}>{item.title}</Text>
@@ -244,11 +299,14 @@ export default class TestScreen extends Component {
                         return(
                             <TouchableOpacity
                                 style={selectStyles.itemContainer}
+                                activeOpacity={0.8}
                                 onPress={()=>{
                                     this.selectTestTypePopup.close();
                                     this.setState({
                                         testType:item,
-                                    })
+                                    });
+                                    this.clearWordList();
+                                    this.addWordListIntoCards();
                                 }}
                             >
                                 <Text style={selectStyles.itemTitle}>{item}</Text>
@@ -262,11 +320,15 @@ export default class TestScreen extends Component {
 }
 
 class Card extends Component{
+    guide1 = "카드를 터치하면 정답을 알려드려요";
+    guide2 = <Text style={{color:'#272727'}}><Text style={{color:'red'}}>모르면 단어</Text>면 왼쪽으로,{"\n"}
+        <Text style={{color:'green'}}>아는 단어</Text>면 오른쪽으로 보내주세요!</Text>;
     /**
      * @params;
      * style
      * word
      * testType
+     * onClicked()
      */
 
     constructor(){
@@ -274,17 +336,72 @@ class Card extends Component{
 
         this.state={
             answerIsVisible : false,
+            answerOpacity : new Animated.Value(0),
+            guideText : this.guide1,
         }
+    }
+
+    showAnswer(){
+        Animated.timing(this.state.answerOpacity,{
+            toValue:1,
+            duration:600
+        }).start();
+        this.setState({
+            answerIsVisible:true,
+            guideText : this.guide2,
+        });
     }
 
     render(){
         let hint = this.props.testType === TestScreen.TESTTYPE_ENG_TO_KOR ?
             this.props.word.word : this.props.word.mean;
 
+        let answer = this.props.testType === TestScreen.TESTTYPE_ENG_TO_KOR ?
+            this.props.word.mean : this.props.word.word;
+
         return(
             <View style={this.props.style}>
-                <Text>{hint}</Text>
-                <Text>{this.props.word.mean}</Text>
+                <TouchableOpacity
+                    style={{flex:1,alignSelf:'stretch'}}
+                    activeOpacity={0.8}
+                    onPress={()=>{
+                        this.showAnswer();
+                        this.props.onClicked();
+                    }}
+                >
+                    <View style={{flex:1}}/>
+                    <Text style={cardStyles.hintText}>{hint}</Text>
+                    <Animated.Text
+                        style={[cardStyles.answerText,{opacity:this.state.answerOpacity}]}
+                    >{answer}</Animated.Text>
+                    <Animated.View
+                        style={[cardStyles.toDaumTouchable,{
+                            opacity:this.state.answerOpacity,
+                        }]}
+                    >
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={()=>{
+                                if(this.state.answerIsVisible) {
+                                    this.props.navigation.navigate('WebScreen', {
+                                        url: "http://alldic.daum.net/search.do?q=" + this.props.word.word
+                                    })
+                                }else{
+                                    this.showAnswer();
+                                    this.props.onClicked();
+                                }
+                            }}
+                        >
+                            <Animated.Image
+                                style={[cardStyles.toDaumImage,]}
+                                source={require("../res/images/daumlogo.png")}
+                                resizeMode={Image.resizeMode.contain}
+                            />
+                        </TouchableOpacity>
+                    </Animated.View>
+
+                    <Text style={cardStyles.guideText}>{this.state.guideText}</Text>
+                </TouchableOpacity>
             </View>
         )
     }
@@ -338,6 +455,12 @@ const styles = StyleSheet.create({
         color:'black',
         alignSelf:'center',
         fontSize:17,
+    },
+    upperOptionContainer:{
+        backgroundColor:'#fff',
+        paddingBottom:20,
+        borderBottomColor:'#222222',
+        borderBottomWidth:0.4,
     }
 });
 
@@ -373,5 +496,41 @@ const cardStyles = StyleSheet.create({
         borderRadius:10,
         borderWidth:1,
         borderColor:'#427677',
+    },
+    hintText:{
+        textAlign:'center',
+        fontSize:24,
+    },
+    answerText:{
+        flex:1.6,
+        marginTop:20,
+        textAlign:'center',
+        fontSize:18,
+    },
+    guideText:{
+        width:"100%",
+        textAlign:'center',
+        fontSize:14,
+        position:'absolute',
+        bottom:0,
+        marginBottom:10,
+    },
+    toDaumImage:{
+        alignSelf:'center',
+        width:40,
+        height:40,
+    },
+    toDaumTouchable:{
+        alignSelf:'flex-end',
+        justifyContent:'center',
+        width:50,
+        height:50,
+        borderWidth:1,
+        borderColor:'#CCCCCC',
+        borderRadius:5,
+        backgroundColor:'#FAFAFA',
+        position:'absolute',
+        bottom:50,
+        right:20,
     }
 });

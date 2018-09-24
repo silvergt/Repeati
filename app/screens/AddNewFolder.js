@@ -33,7 +33,9 @@ export default class AddNewFolder extends Component {
     static navigationOptions =({navigation}) =>{
         return(
             {
-
+                headerStyle: {
+                    backgroundColor: "#fff",
+                },
                 headerTitle:
                     <Text>단어장 추가</Text>,
                 headerLeft:
@@ -95,7 +97,7 @@ export default class AddNewFolder extends Component {
             return;
         }
 
-        this.props.dictStore.addNewWordbook(this.state.revisedWordbookTitle);
+        this.props.dictStore.addNewWordbook(this.state.wordbookTitle);
 
         let goBackListener = this.props.navigation.getParam('onGoBack',-1);
         goBackListener();
@@ -118,8 +120,8 @@ export default class AddNewFolder extends Component {
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
-                            onChangeText={(text)=>{this.setState({revisedWordbookTitle:text})}}
-                        >{this.state.revisedWordbookTitle}</TextInput>
+                            onChangeText={(text)=>{this.setState({wordbookTitle:text})}}
+                        >{this.state.wordbookTitle}</TextInput>
                         <View style={{width:screen.width*2/3,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
                     </View>
                     <View style={{flex:1.5}}/>
@@ -127,7 +129,7 @@ export default class AddNewFolder extends Component {
                 <TouchableOpacity  style={styles.lowerButton}
                                    onPress={()=>{this.onClickedComplete()}}
                 >
-                    <Text style={styles.lowerButtonText}>수정 완료</Text>
+                    <Text style={styles.lowerButtonText}>추가하기</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
     lowerButton:{
         justifyContent:'center',
         backgroundColor:'#344768',
-        height:50,
+        height:60,
     },
     lowerButtonText:{
         color:'white',
