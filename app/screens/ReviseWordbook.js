@@ -28,9 +28,14 @@ export default class ReviseWordbook extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text>단어장 수정</Text>,
+                    <Text style={{
+                        color:'black',
+                    }}>단어장 수정</Text>,
                 headerLeft:
                     <TouchableOpacity style={
                         {

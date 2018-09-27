@@ -8,7 +8,6 @@ import ReactNative, {
     Dimensions,
     Alert,
     Keyboard,
-    Platform
 } from 'react-native';
 import Image from 'react-native-fast-image';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -27,9 +26,14 @@ export default class InstantSearchScreen extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text resizeMode="contain" style={{color:'black',}}>
+                    <Text style={{
+                        color:'black',
+                    }}>
                         빠른 검색
                     </Text>,
                 headerLeft:
@@ -44,6 +48,18 @@ export default class InstantSearchScreen extends Component {
                     >
                         <Image style={{width:20,height:20}} source={require("../res/images/back.png")}/>
                     </TouchableOpacity>,
+                headerRight:
+                    <TouchableOpacity
+                        style={{
+                            height:"100%",
+                            justifyContent:'center',
+                            alignItems:'center',
+                            marginRight:10,
+                        }}
+                        onPress={()=>{navigation.state.params.holder.openWordbookSelectPopup()}}>
+                        <Text style={{color:'black'}}>단어 추가</Text>
+                    </TouchableOpacity>
+
             }
         )
     };
@@ -59,25 +75,47 @@ export default class InstantSearchScreen extends Component {
         this.onClickAddWord = this.onClickAddWord.bind(this);
     }
 
+    componentDidMount(){
+        this.props.navigation.setParams({
+            holder:this,
+        });
+
+    }
+
+    clearText(){
+        this.setState({
+            newWordTitle:"",
+            newWordMean:"",
+        })
+    }
+
+
     onClickAddWord(selectedWordbookID){
         if(this.state.newWordTitle === "" || this.state.newWordMean === ""){
             Alert.alert(
                 '앗!',
                 '영어단어와 뜻을 모두 입력해주세요!',
                 [
-                    {text: 'OK', onPress: () => console.log('OK Pressed') },
+                    {text: 'OK', onPress: () => {this.selectWordbookPopup.close()} },
                 ]
             );
             return;
         }
 
         this.props.dictStore.addNewWord(selectedWordbookID,this.state.newWordTitle,this.state.newWordMean);
+        this.clearText();
 
         let goBackListener = this.props.navigation.getParam('onGoBack',-1);
         goBackListener();
 
-        this.selectWordbookPopup.close();
-        this.props.navigation.goBack();
+        Alert.alert(
+            '성공!',
+            '단어 '+this.state.newWordTitle+' 를 추가했어요!',
+            [
+                {text: 'OK', onPress: () => {this.selectWordbookPopup.close()} },
+            ]
+        );
+        // this.props.navigation.goBack();
 
     }
 
@@ -143,10 +181,10 @@ export default class InstantSearchScreen extends Component {
                     />
                     <Text style={styles.plainText}>영어 단어</Text>
                     <View style={{height:20}}/>
-                    <View style={styles.wordbookTextInputContainer}>
+                    <View style={styles.TextInputContainer}>
                         <TextInput
-                            ref={comp=>this.textInput=comp}
-                            style={styles.wordbookTextInput}
+                            ref={comp=>this.wordTextInput=comp}
+                            style={styles.TextInput}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
@@ -180,11 +218,13 @@ export default class InstantSearchScreen extends Component {
                     </View>
                     <Text style={styles.plainText}>뜻(클릭해 직접 수정하세요)</Text>
                     <View style={{height:20}}/>
-                    <View style={styles.wordbookTextInputContainer}>
+                    <View style={styles.TextInputContainer}>
                         <TextInput
-                            style={styles.wordbookTextInput}
+                            style={styles.TextInput}
+                            ref={comp=>this.meanTextInput=comp}
                             maxLength={50}
                             blurOnSubmit={true}
+                            multiline={true}
                             returnKeyType='done'
                             autoCorrect={false}
                             value={this.state.newWordMean}
@@ -198,16 +238,6 @@ export default class InstantSearchScreen extends Component {
                     </View>
                     <View style={{height:50}}/>
                 </KeyboardAwareScrollView>
-
-                <TouchableOpacity
-                    style={styles.addToWordbookContainer}
-                    activeOpacity={0.8}
-                    onPress={()=>{
-                        this.openWordbookSelectPopup();
-                    }}
-                >
-                    <Text style={styles.addToWordbookText}>단어장에 추가!</Text>
-                </TouchableOpacity>
 
                 <SelectListPopup
                     style={selectStyles.selectWordbookPopup}
@@ -259,18 +289,18 @@ const styles = StyleSheet.create({
         alignSelf:'center',
         textAlign:'center'
     },
-    wordbookTextInput:{
+    TextInput:{
         width:screen.width,
         textAlign:'center',
         justifyContent:'center',
         alignSelf:'center',
-        fontSize:Platform.OS === 'ios' ? 20 : 16,
+        fontSize:18,
         paddingLeft:20,
         paddingRight:20,
     },
     plainText:{
         color:"#427677",
-        fontSize:Platform.OS === 'ios' ? 16 : 12,
+        fontSize:16,
         alignSelf:'center',
     },
     swapContainer:{
@@ -292,7 +322,7 @@ const styles = StyleSheet.create({
     },
     addToWordbookText:{
         color:'white',
-        fontSize:Platform.OS === 'ios' ? 17 : 14,
+        fontSize:17,
     }
 });
 

@@ -33,9 +33,14 @@ export default class AddNewWord extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text>단어 추가</Text>,
+                    <Text style={{
+                        color:'black',
+                    }}>단어 추가</Text>,
                 headerLeft:
                     <TouchableOpacity
                         style={{
@@ -86,6 +91,13 @@ export default class AddNewWord extends Component {
         });
     }
 
+    clearText(){
+        this.setState({
+            newWordTitle:"",
+            newWordMean:"",
+        })
+    }
+
     onClickedComplete(){
         if(this.state.newWordTitle === "" || this.state.newWordMean === ""){
             Alert.alert(
@@ -99,11 +111,20 @@ export default class AddNewWord extends Component {
         }
 
         this.props.dictStore.addNewWord(this.state.wordbookID,this.state.newWordTitle,this.state.newWordMean);
-        
+        this.clearText();
+
         let goBackListener = this.props.navigation.getParam('onGoBack',-1);
         goBackListener();
 
-        this.props.navigation.goBack();
+        Alert.alert(
+            '성공!',
+            '단어 '+this.state.newWordTitle+' 를 추가했어요!',
+            [
+                {text: 'OK', onPress: () => console.log('OK Pressed') },
+            ]
+        );
+
+        // this.props.navigation.goBack();
     }
 
     onChangeWordTextInput(text){
@@ -183,7 +204,6 @@ export default class AddNewWord extends Component {
                     </View>
                     <View style={{height:20}}/>
                     <Text style={styles.plainText}>영어 단어</Text>
-                    <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             ref={comp=>this.wordInput=comp}
@@ -221,7 +241,6 @@ export default class AddNewWord extends Component {
                     </View>
 
                     <Text style={styles.plainText}>뜻(클릭해 직접 수정하세요)</Text>
-                    <View style={{height:20}}/>
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             ref={comp=>this.meanInput=comp}
@@ -305,9 +324,10 @@ const styles = StyleSheet.create({
         justifyContent:'center',
         alignSelf:'center',
         fontSize:20,
-        marginBottom:5,
+        paddingBottom:5,
         paddingLeft:20,
-        paddingRight:20
+        paddingRight:20,
+        paddingTop:10,
     },
     plainText:{
         color:"#427677",

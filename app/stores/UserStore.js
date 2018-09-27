@@ -8,6 +8,13 @@ export class UserStore{
     @observable totalSolved = 0;
     @observable totalCorrect = 0;
 
+    retrieveFromDatabase(userSerialNumber,userName,totalSolved,totalCorrect){
+        this.userSerialNumber = userSerialNumber;
+        this.userName = userName;
+        this.totalSolved = totalSolved;
+        this.totalCorrect = totalCorrect;
+    }
+
     setUserName(name){
         this.userName = name;
     }

@@ -22,6 +22,11 @@ export default class SelectListPopup extends Component {
      * renderItem(item,index)
      */
 
+    constructor(){
+        super();
+
+    }
+
     show(){
         this.modal.open();
     }
@@ -34,7 +39,6 @@ export default class SelectListPopup extends Component {
     }
 
     render() {
-
         return (
             <Modal
                 ref={comp => this.modal = comp}

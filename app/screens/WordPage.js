@@ -8,7 +8,7 @@ import {
     FlatList,
     Image,
     Animated,
-    Platform
+    Platform, Dimensions
 } from 'react-native';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
@@ -20,6 +20,7 @@ import YesNoPopup from "../components/YesNoPopup";
 import {toJS} from 'mobx'
 import WordbookScreen from "./WordbookScreen";
 
+const screen = Dimensions.get('window');
 
 @inject("dictStore")
 @observer
@@ -43,9 +44,14 @@ export default class WordPage extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text resizeMode="contain" style={{color:'black',}}>
+                    <Text style={{
+                        color:'black',
+                    }}>
                         단어장 : {navigation.state.params.wordbookTitle}
                         </Text>,
                 headerLeft:
@@ -384,7 +390,9 @@ class WordView extends Component {
 
         let circleSource;
         const correctRatio = this.props.word.totalCorrect/this.props.word.totalSolved;
-        if(correctRatio>=0.8){
+        if(this.props.word.totalSolved <= 3){
+            circleSource = require("../res/images/new.png");
+        }else if(correctRatio>=0.8){
             circleSource = require("../res/images/circle_green.png");
         }else if(correctRatio<=0.3){
             circleSource = require("../res/images/circle_red.png");
@@ -551,6 +559,7 @@ const wordViewStyles = StyleSheet.create({
     },
     wordTitle:{
         textAlign:'center',
+        color:'black',
     },
     wordButton:{
         width:40,

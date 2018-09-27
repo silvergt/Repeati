@@ -7,13 +7,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "es6-symbol": "^3.1.1",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
     "react": "16.4.1",
     "react-native": "0.56.0",
     "react-native-deck-swiper": "^1.5.17",
-    "react-native-keyboard-aware-scroll-view": "^0.6.0",
     "react-native-fast-image": "^4.0.14",
+    "react-native-keyboard-aware-scroll-view": "^0.6.0",
     "react-native-modalbox": "^1.6.0",
     "react-navigation": "2.0.1"
   },

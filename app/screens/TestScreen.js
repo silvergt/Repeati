@@ -41,9 +41,12 @@ export default class TestScreen extends Component {
                 headerStyle: {
                     backgroundColor: "#fff",
                     borderBottomWidth: 0,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text>단어 시험</Text>,
+                    <Text style={{
+                        color:'black',
+                    }}>단어 시험</Text>,
                 headerLeft:
                     <TouchableOpacity
                         style={{
@@ -65,7 +68,7 @@ export default class TestScreen extends Component {
                             alignItems:'center',
                         }}
                         onPress={()=>{navigation.state.params.holder.onClickedComplete()}}>
-                        <Text>점수확인</Text>
+                        <Text style={{color:'black',}}>점수확인</Text>
                     </TouchableOpacity>
 
             }
@@ -362,7 +365,7 @@ class Card extends Component{
         return(
             <View style={this.props.style}>
                 <TouchableOpacity
-                    style={{flex:1,alignSelf:'stretch'}}
+                    style={{flex:1,alignSelf:'stretch',padding:15}}
                     activeOpacity={0.8}
                     onPress={()=>{
                         this.showAnswer();
@@ -500,20 +503,23 @@ const cardStyles = StyleSheet.create({
     hintText:{
         textAlign:'center',
         fontSize:24,
+        color:'black',
     },
     answerText:{
         flex:1.6,
         marginTop:20,
         textAlign:'center',
         fontSize:18,
+        color:'black',
     },
     guideText:{
-        width:"100%",
+        alignSelf:'center',
         textAlign:'center',
         fontSize:14,
         position:'absolute',
         bottom:0,
         marginBottom:10,
+        color:'black',
     },
     toDaumImage:{
         alignSelf:'center',

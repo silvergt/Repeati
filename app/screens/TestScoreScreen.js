@@ -23,9 +23,14 @@ export default class TestScoreScreen extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
+                    elevation:0,
                 },
                 headerTitle:
-                    <Text>시험 결과</Text>,
+                    <Text style={{
+                        color:'black',
+                    }}>시험 결과</Text>,
                 headerLeft:
                     <TouchableOpacity
                         style={{

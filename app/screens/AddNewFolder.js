@@ -35,9 +35,14 @@ export default class AddNewFolder extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
+                    elevation:0,
+                    borderBottomColor:'#222222',
+                    borderBottomWidth:0.3,
                 },
                 headerTitle:
-                    <Text>단어장 추가</Text>,
+                    <Text style={{
+                        color:'black',
+                    }}>단어장 추가</Text>,
                 headerLeft:
                     <TouchableOpacity style={
                         {

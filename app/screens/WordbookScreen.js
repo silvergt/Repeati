@@ -9,7 +9,8 @@ import {
     Image,
     Dimensions,
     BackHandler,
-    Alert
+    Alert,
+    Platform
 } from 'react-native';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
@@ -19,6 +20,7 @@ import {toJS} from 'mobx'
 import AddWordPopup from "../components/AddWordPopup";
 import SettingButton from "../components/SettingButton";
 import YesNoPopup from "../components/YesNoPopup";
+import store from "../stores";
 
 const screen = Dimensions.get("window");
 
@@ -36,10 +38,17 @@ export default class WordbookScreen extends Component {
 
                 headerStyle: {
                     backgroundColor: "#fff",
-                    textAlign:'center',
+                    elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
+
                 headerTitle:
-                    <Text style={{color:'black'}}>{appName}</Text>,
+                    <Text style={{
+                        color:'black',
+                        width:screen.width,
+                        textAlign:'center',
+                    }}>{appName}</Text>,
                 headerRight:
                     <View style={styles.headerRightContainer}>
                         <TouchableOpacity style={styles.headerImageContainer}
@@ -80,7 +89,7 @@ export default class WordbookScreen extends Component {
         this.state={
             upperTitle:"Repeati",
             flatListRenderType: "",
-            flatListData: undefined,
+            flatListData: [],
             selectedWordbookID:-1,
         };
 
@@ -93,28 +102,37 @@ export default class WordbookScreen extends Component {
             holder:this,
         });
 
-        retrieveState().then(
-            this.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK)
+        retrieveState().then((dataTemp)=> {
+            console.log('retrieved : ',dataTemp);
+            try {
+                if(dataTemp.dictStore.wordbookID !== undefined) {
+                    this.props.dictStore.retrieveFromDatabase(
+                        dataTemp.dictStore.wordbookID,
+                        dataTemp.dictStore.wordID,
+                        dataTemp.dictStore.wordbook
+                    );
+                }
+            }catch (e) {console.log("dictStore error : ",e)}
+            try{
+                if(dataTemp.userStore.userSerialNumber !== undefined) {
+                    this.props.userStore.retrieveFromDatabase(
+                        dataTemp.userStore.userSerialNumber,
+                        dataTemp.userStore.userName,
+                        dataTemp.userStore.totalSolved,
+                        dataTemp.userStore.totalCorrect,
+                    );
+                }
+            }catch (e) {{console.log("userStore error : ",e)}}
+
+                console.log("STATE RETRIEVED");
+                this.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK);
+                console.log("momo",this.props.dictStore.wordbook);
+            }
         );
 
         this.setState({
             flatListData: this.props.dictStore.wordbook,
         });
-
-        this.props.dictStore.addNewWordbook("TEST1");
-        this.props.dictStore.addNewWordbook("TEST2");
-        this.props.dictStore.addNewWordbook("TEST3");
-        this.props.dictStore.addNewWord(0,"lif","a");
-        this.props.dictStore.addNewWord(0,"number2","2");
-        this.props.dictStore.addNewWord(0,"num3","3");
-        this.props.dictStore.addNewWord(0,"num4","4");
-        this.props.dictStore.wordbook[0].wordList[0].totalSolved=81;
-        this.props.dictStore.wordbook[0].wordList[0].totalCorrect=31;
-        this.props.dictStore.addNewWord(0,"TEST32","SUPER");
-        this.props.dictStore.wordbook[0].wordList[1].totalSolved=52;
-        this.props.dictStore.wordbook[0].wordList[1].totalCorrect=9;
-        this.props.dictStore.addNewWord(0,"TEST33","SUPER");
-        this.props.dictStore.addNewWord(2,"TEST34","SUPER");
 
     }
 
@@ -205,6 +223,7 @@ export default class WordbookScreen extends Component {
                         data={this.state.flatListData}
                         extraData={this.state.flatListRenderType}
                         renderItem={({item,index})=>{
+                            console.log("items",item);
                             return(this.setFlatListRenderItem(item,index));
                         }}
                         keyExtractor={(item, index) => index.toString()}

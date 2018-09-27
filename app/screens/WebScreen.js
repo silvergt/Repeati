@@ -3,9 +3,12 @@ import {
     StyleSheet,
     View,
     WebView,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions
 } from 'react-native';
 import Image from 'react-native-fast-image';
+
+const screen = Dimensions.get('window');
 
 export default class WebScreen extends Component<Props> {
 
@@ -15,6 +18,7 @@ export default class WebScreen extends Component<Props> {
                 headerStyle: {
                     backgroundColor: "#fff",
                     borderBottomWidth: 0,
+                    elevation:0,
                 },
                 headerLeft:
                     <TouchableOpacity

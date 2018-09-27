@@ -53,13 +53,13 @@ const styles = StyleSheet.create({
     textStyle_word:{
         textAlign:'center',
         color:"#878787",
-        fontSize:16,
+        fontSize:15,
         alignSelf:'center',
     },
     textStyle_mean:{
         flex:1,
         color:"#447677",
-        fontSize:15,
+        fontSize:14,
         alignSelf:'center',
     }
 });
