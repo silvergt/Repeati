@@ -11,6 +11,8 @@ export class DictionaryStore {
     retrieveFromDatabase(wordbookID,wordID,wordbook){
         this.wordbookID=wordbookID;
         this.wordID=wordID;
+        this.wordbook.clear();
+        console.log("check if wordbook is empty",toJS(this.wordbook));
         for(let i=0;i<wordbook.length;i++){
             this.wordbook.push(wordbook[i]);
         }
@@ -24,7 +26,7 @@ export class DictionaryStore {
                 wordList:[]
             }
         );
-        saveState().then(()=>{console.log("wordbook "+title+"saved")});
+        saveState().then(()=>{console.log("wordbook "+title+" saved")});
     }
 
     addNewWord(wordbookID,word,mean){
@@ -42,7 +44,7 @@ export class DictionaryStore {
                 )
             }
         });
-        saveState().then(()=>{console.log("word "+word+"saved")});
+        saveState().then(()=>{console.log("word "+word+" saved")});
     }
 
     reviseWord(wordbookID,wordID,newWord,newMean){
@@ -56,7 +58,7 @@ export class DictionaryStore {
                 }
             }
         }
-        saveState().then(()=>{console.log("word "+newWord+"saved")});
+        saveState().then(()=>{console.log("word "+newWord+" saved")});
     }
 
 
@@ -109,7 +111,7 @@ export class DictionaryStore {
         }
         if(index === -1)return;
         this.wordbook.splice(index,1);
-        saveState().then(()=>{console.log("wordbookID "+wordbookID+"deleted")});
+        saveState().then(()=>{console.log("wordbookID "+wordbookID+" deleted")});
     }
 
     deleteWord(wordbookID,wordID){
@@ -126,7 +128,7 @@ export class DictionaryStore {
                 wordbook.wordList.splice(index,1);
             }
         });
-        saveState().then(()=>{console.log("wordID "+wordID+"deleted")});
+        saveState().then(()=>{console.log("wordID "+wordID+" deleted")});
     }
 
     getAlphabeticalWordbook(wordbookID){
@@ -154,7 +156,7 @@ export class DictionaryStore {
                 }
             }
         });
-        saveState().then(()=>{console.log("wordID "+wordID+"has been set important")});
+        saveState().then(()=>{console.log("wordID "+wordID+" has been set important")});
     }
 
     setWordSolvedCount(wordbookID,wordID,correct){
@@ -170,7 +172,7 @@ export class DictionaryStore {
                 }
             }
         });
-        saveState().then(()=>{console.log("wordID "+wordID+"solved count modified")});
+        saveState().then(()=>{console.log("wordID "+wordID+" solved count modified")});
     }
 
     clear(){

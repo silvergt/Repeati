@@ -10,7 +10,8 @@ import {
     Dimensions,
     BackHandler,
     Alert,
-    Platform
+    Platform,
+    StatusBar,
 } from 'react-native';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
@@ -21,6 +22,7 @@ import AddWordPopup from "../components/AddWordPopup";
 import SettingButton from "../components/SettingButton";
 import YesNoPopup from "../components/YesNoPopup";
 import store from "../stores";
+import SplashScreen from "react-native-splash-screen"
 
 const screen = Dimensions.get("window");
 
@@ -83,6 +85,8 @@ export default class WordbookScreen extends Component {
         )
     };
 
+    static initialize = true;
+
     constructor(){
         super();
 
@@ -92,48 +96,50 @@ export default class WordbookScreen extends Component {
             flatListData: [],
             selectedWordbookID:-1,
         };
-
-        this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
-        this.handleBackPress = this.handleBackPress.bind(this);
     }
 
     componentDidMount(){
+        SplashScreen.hide();
+
         this.props.navigation.setParams({
             holder:this,
         });
 
-        retrieveState().then((dataTemp)=> {
-            console.log('retrieved : ',dataTemp);
-            try {
-                if(dataTemp.dictStore.wordbookID !== undefined) {
-                    this.props.dictStore.retrieveFromDatabase(
-                        dataTemp.dictStore.wordbookID,
-                        dataTemp.dictStore.wordID,
-                        dataTemp.dictStore.wordbook
-                    );
-                }
-            }catch (e) {console.log("dictStore error : ",e)}
-            try{
-                if(dataTemp.userStore.userSerialNumber !== undefined) {
-                    this.props.userStore.retrieveFromDatabase(
-                        dataTemp.userStore.userSerialNumber,
-                        dataTemp.userStore.userName,
-                        dataTemp.userStore.totalSolved,
-                        dataTemp.userStore.totalCorrect,
-                    );
-                }
-            }catch (e) {{console.log("userStore error : ",e)}}
+        if (this.state.flatListData.length===0){
+            retrieveState().then((dataTemp)=> {
+                    console.log('retrieved : ',dataTemp);
+                    try {
+                        if(dataTemp.dictStore.wordbookID !== undefined) {
+                            this.props.dictStore.retrieveFromDatabase(
+                                dataTemp.dictStore.wordbookID,
+                                dataTemp.dictStore.wordID,
+                                dataTemp.dictStore.wordbook
+                            );
+                        }
+                    }catch (e) {console.log("dictStore error : ",e)}
+                    try{
+                        if(dataTemp.userStore.userSerialNumber !== undefined) {
+                            this.props.userStore.retrieveFromDatabase(
+                                dataTemp.userStore.userSerialNumber,
+                                dataTemp.userStore.userName,
+                                dataTemp.userStore.totalSolved,
+                                dataTemp.userStore.totalCorrect,
+                            );
+                        }
+                    }catch (e) {{console.log("userStore error : ",e)}}
 
-                console.log("STATE RETRIEVED");
-                this.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK);
-                console.log("momo",this.props.dictStore.wordbook);
-            }
-        );
+                    console.log("STATE RETRIEVED");
+                    this.setRenderMode(WordbookScreen.RENDERTYPE_WORDBOOK);
+                }
+            );
+        }
+
 
         this.setState({
             flatListData: this.props.dictStore.wordbook,
         });
 
+        WordbookScreen.initialize = false;
     }
 
 
@@ -210,10 +216,10 @@ export default class WordbookScreen extends Component {
         }
     }
 
-    handleBackPress(){
-    }
 
     render() {
+        console.log("rendering");
+
         return (
             <View style={styles.container}>
                 <View style={{flex:1,flexDirection:"row"}}>
@@ -223,7 +229,7 @@ export default class WordbookScreen extends Component {
                         data={this.state.flatListData}
                         extraData={this.state.flatListRenderType}
                         renderItem={({item,index})=>{
-                            console.log("items",item);
+                            console.log("items",toJS(item));
                             return(this.setFlatListRenderItem(item,index));
                         }}
                         keyExtractor={(item, index) => index.toString()}
@@ -231,10 +237,29 @@ export default class WordbookScreen extends Component {
 
                 </View>
                 <LowerBar
-                    button1Pressed={()=>{
-                        this.props.navigation.navigate('TestScreen',{
-                            wordbookID:0,
-                        })
+                    button1Pressed={()=> {
+                        if (this.props.dictStore.wordbook.length > 0) {
+                            this.props.navigation.navigate('TestScreen', {
+                                wordbookID: 0,
+                            })
+                        }else{
+                            Alert.alert(
+                                "잠깐!",
+                                "먼저 단어장을 만들어보세요",
+                                [
+                                    {text: '만들러가기', onPress: () => {
+                                        this.props.navigation.navigate("AddNewFolder",{
+                                            onGoBack:()=>{
+                                                this.addWordPopup.close();
+                                                this.setState({
+                                                    flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
+                                                });
+                                            }
+                                        });
+                                        }},
+                                ]
+                            );
+                        }
                     }}
                     button2Pressed={()=>{
                         this.props.navigation.navigate('InstantSearchScreen',{
@@ -279,13 +304,13 @@ export default class WordbookScreen extends Component {
                     left={"삭제"}
                     right={"취소"}
                     leftClicked={()=>{
+                        // this.deletePopup.close();
                         if(this.props.dictStore.wordbook.length===1){
-                            this.deletePopup.close();
                             Alert.alert(
                                 '앗!',
                                 '단어장을 전부 다 지우면 안돼요!',
                                 [
-                                    {text: 'OK', onPress: () => console.log('OK Pressed') },
+                                    {text: 'OK', onPress: () => {this.deletePopup.close()} },
                                 ]
                             );
                             return;
