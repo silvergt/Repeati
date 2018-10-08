@@ -22,7 +22,7 @@ import AddWordPopup from "../components/AddWordPopup";
 import SettingButton from "../components/SettingButton";
 import YesNoPopup from "../components/YesNoPopup";
 import store from "../stores";
-import SplashScreen from "react-native-splash-screen"
+// import RNSplashScreen from 'react-native-splash-screen'
 
 const screen = Dimensions.get("window");
 
@@ -99,8 +99,6 @@ export default class WordbookScreen extends Component {
     }
 
     componentDidMount(){
-        SplashScreen.hide();
-
         this.props.navigation.setParams({
             holder:this,
         });
@@ -140,6 +138,8 @@ export default class WordbookScreen extends Component {
         });
 
         WordbookScreen.initialize = false;
+
+        // RNSplashScreen.hide();
     }
 
 
@@ -218,10 +218,12 @@ export default class WordbookScreen extends Component {
 
 
     render() {
-        console.log("rendering");
-
         return (
             <View style={styles.container}>
+                <StatusBar
+                    backgroundColor="white"
+                    barStyle="dark-content"
+                />
                 <View style={{flex:1,flexDirection:"row"}}>
                     <FlatList
                         ref={comp => this.flatList = comp}

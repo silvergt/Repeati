@@ -188,6 +188,7 @@ export default class InstantSearchScreen extends Component {
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
+                            multiline={true}
                             autoCorrect={false}
                             underlineColorAndroid={"#FFFFFF"}
                             value={this.state.newWordTitle}

@@ -211,6 +211,7 @@ export default class AddNewWord extends Component {
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
+                            multiline={true}
                             autoCorrect={false}
                             underlineColorAndroid={"#FFFFFF"}
                             value={this.state.newWordTitle}
@@ -247,6 +248,7 @@ export default class AddNewWord extends Component {
                             style={styles.wordbookTextInput}
                             maxLength={50}
                             blurOnSubmit={true}
+                            multiline={true}
                             returnKeyType='done'
                             autoCorrect={false}
                             value={this.state.newWordMean}

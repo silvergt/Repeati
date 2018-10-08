@@ -18,6 +18,7 @@ import TestScoreScreen from "./app/screens/TestScoreScreen"
 import WebScreen from "./app/screens/WebScreen"
 import InstantSearchScreen from "./app/screens/InstantSearchScreen"
 
+import RNSplashScreen from 'react-native-splash-screen'
 
 const RootStack = createStackNavigator({
         Home:{
@@ -55,6 +56,15 @@ const RootStack = createStackNavigator({
 );
 
 class App extends Component{
+
+    componentDidMount(){
+        setTimeout(()=>{
+            console.log("TIMING");
+            RNSplashScreen.hide();
+        },1500);
+
+    }
+
     render(){
         return(
             <Provider {...store}>
