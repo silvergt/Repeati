@@ -33,7 +33,7 @@ export default class RecommendedWord extends Component {
                     paddingLeft:25,
                     paddingRight:10,
                     borderRadius:5,
-                    borderColor:"#427677",
+                    borderColor:"#35466A",
                     borderWidth:1,
                 }]}
                 onPress={()=>{
@@ -55,11 +55,13 @@ const styles = StyleSheet.create({
         color:"#878787",
         fontSize:15,
         alignSelf:'center',
+        fontWeight:'500'
     },
     textStyle_mean:{
         flex:1,
-        color:"#447677",
+        color:"#53697D",
         fontSize:14,
         alignSelf:'center',
+        fontWeight:'200'
     }
 });

@@ -6,13 +6,13 @@ import {
     TouchableOpacity,
     Text,
     FlatList,
-    Image,
     Dimensions,
     BackHandler,
     Alert,
     Platform,
     StatusBar,
 } from 'react-native';
+import Image from 'react-native-fast-image'
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
 import {inject,observer} from 'mobx-react'
@@ -46,11 +46,14 @@ export default class WordbookScreen extends Component {
                 },
 
                 headerTitle:
-                    <Text style={{
-                        color:'black',
-                        width:screen.width,
-                        textAlign:'center',
-                    }}>{appName}</Text>,
+                    <Image
+                        style={{
+                            marginLeft:Platform.OS === 'ios' ? 0 : 20,
+                            width:60,
+                        }}
+                        source={require("../res/images/wordlogo.png")}
+                        resizeMode={Image.resizeMode.contain}
+                    />,
                 headerRight:
                     <View style={styles.headerRightContainer}>
                         <TouchableOpacity style={styles.headerImageContainer}
@@ -218,12 +221,40 @@ export default class WordbookScreen extends Component {
 
 
     render() {
-        return (
-            <View style={styles.container}>
-                <StatusBar
-                    backgroundColor="white"
-                    barStyle="dark-content"
-                />
+        let body = undefined;
+        if(this.state.flatListData.length === 0){
+            console.log("flatListData is empty! : No wordbook existing");
+            body =
+                <View style={{flex:1,flexDirection:"column",justifyContent:'center'}}>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={ ()=>
+                            {
+                                this.props.navigation.navigate('AddNewFolder',{
+                                    onGoBack:()=>{
+                                        this.setState({
+                                            flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
+                                        });
+                                    }
+                                })
+                            }
+                        }
+                    >
+                        <Image
+                            style={styles.newWordbookImage}
+                            source={require("../res/images/plus_thin.png")}
+                        />
+                        <Text
+                            style={styles.newWordbookTitle}
+                        >첫번째 단어장 만들기</Text>
+                        <Text
+                            style={styles.newWordbookText}
+                        >위 버튼을 눌러 단어장을 만들어보세요.{"\n"}아주 쉽답니다.</Text>
+                    </TouchableOpacity>
+
+                </View>
+        }else{
+            body =
                 <View style={{flex:1,flexDirection:"row"}}>
                     <FlatList
                         ref={comp => this.flatList = comp}
@@ -237,13 +268,34 @@ export default class WordbookScreen extends Component {
                         keyExtractor={(item, index) => index.toString()}
                     />
 
-                </View>
+                </View>;
+        }
+
+
+        return (
+            <View style={styles.container}>
+                <StatusBar
+                    backgroundColor="white"
+                    barStyle="dark-content"
+                />
+                {body}
                 <LowerBar
                     button1Pressed={()=> {
                         if (this.props.dictStore.wordbook.length > 0) {
-                            this.props.navigation.navigate('TestScreen', {
-                                wordbookID: 0,
-                            })
+                            let index = this.props.dictStore.getAnyWordbookHasWord();
+                            if(index !== -1){
+                                this.props.navigation.navigate('TestScreen',{
+                                    wordbookID:index,
+                                })
+                            }else{
+                                Alert.alert(
+                                    "잠깐!",
+                                    "먼저 단어장에 단어를 등록해보세요",
+                                    [
+                                        {text: 'OK', onPress: () => {}},
+                                    ]
+                                );
+                            }
                         }else{
                             Alert.alert(
                                 "잠깐!",
@@ -252,13 +304,12 @@ export default class WordbookScreen extends Component {
                                     {text: '만들러가기', onPress: () => {
                                         this.props.navigation.navigate("AddNewFolder",{
                                             onGoBack:()=>{
-                                                this.addWordPopup.close();
                                                 this.setState({
                                                     flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
                                                 });
                                             }
                                         });
-                                        }},
+                                    }},
                                 ]
                             );
                         }
@@ -274,7 +325,19 @@ export default class WordbookScreen extends Component {
                             }
                         });
                     }}
+                    button3Pressed={()=>{
+                        this.props.navigation.navigate('SettingsScreen',{
+                            onGoBack:()=>{
+                                if(this.state.flatListRenderType===WordbookScreen.RENDERTYPE_WORDBOOKMODIFY){
+                                    this.setState({flatListRenderType:WordbookScreen.MODIFY_NEEDED_MODIFY});
+                                }else{
+                                    this.setState({flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK});
+                                }
+                            }
+                        });
+                    }}
                 />
+
                 <AddWordPopup
                     ref={comp=>this.addWordPopup = comp}
                     style={{width:screen.width,height:150}}
@@ -289,6 +352,25 @@ export default class WordbookScreen extends Component {
                         })
                     }}
                     onAddNewWord={()=>{
+                        if( this.props.dictStore.wordbook.length === 0 ){
+                            Alert.alert(
+                                "잠깐!",
+                                "먼저 단어장을 만들어보세요",
+                                [
+                                    {text: '만들러가기', onPress: () => {
+                                            this.props.navigation.navigate("AddNewFolder",{
+                                                onGoBack:()=>{
+                                                    this.addWordPopup.close();
+                                                    this.setState({
+                                                        flatListRenderType:WordbookScreen.MODIFY_NEEDED_WORDBOOK,
+                                                    });
+                                                }
+                                            });
+                                        }},
+                                ]
+                            );
+                            return;
+                        }
                         this.props.navigation.navigate('AddNewWord',{
                             onGoBack:()=>{
                                 this.addWordPopup.close();
@@ -307,16 +389,16 @@ export default class WordbookScreen extends Component {
                     right={"취소"}
                     leftClicked={()=>{
                         // this.deletePopup.close();
-                        if(this.props.dictStore.wordbook.length===1){
-                            Alert.alert(
-                                '앗!',
-                                '단어장을 전부 다 지우면 안돼요!',
-                                [
-                                    {text: 'OK', onPress: () => {this.deletePopup.close()} },
-                                ]
-                            );
-                            return;
-                        }
+                        // if(this.props.dictStore.wordbook.length===1){
+                        //     Alert.alert(
+                        //         '앗!',
+                        //         '단어장을 전부 다 지우면 안돼요!',
+                        //         [
+                        //             {text: 'OK', onPress: () => {this.deletePopup.close()} },
+                        //         ]
+                        //     );
+                        //     return;
+                        // }
                         this.props.dictStore.deleteWordbook(this.state.selectedWordbookID);
                         this.setState({
                             flatListRenderType:WordbookScreen.MODIFY_NEEDED_MODIFY,
@@ -418,6 +500,24 @@ const styles = StyleSheet.create({
     },
     flatList:{
         flex:1,
+    },
+    newWordbookTitle:{
+        alignSelf:'center',
+        margin:20,
+        fontSize:20,
+        color:'black',
+        textAlign:'center'
+    },
+    newWordbookText:{
+        alignSelf:'center',
+        fontSize:14,
+        color:'black',
+        textAlign:'center'
+    },
+    newWordbookImage:{
+        alignSelf:'center',
+        width:60,
+        height:60,
     },
     headerRightContainer:{
         flexDirection:'row',

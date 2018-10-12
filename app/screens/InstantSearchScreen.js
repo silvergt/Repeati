@@ -26,13 +26,14 @@ export default class InstantSearchScreen extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
+                        fontWeight:'500'
                     }}>
                         빠른 검색
                     </Text>,
@@ -186,6 +187,7 @@ export default class InstantSearchScreen extends Component {
                             ref={comp=>this.wordTextInput=comp}
                             style={styles.TextInput}
                             maxLength={25}
+                            autoFocus={true}
                             returnKeyType='done'
                             blurOnSubmit={true}
                             multiline={true}
@@ -193,7 +195,7 @@ export default class InstantSearchScreen extends Component {
                             underlineColorAndroid={"#FFFFFF"}
                             value={this.state.newWordTitle}
                             onChangeText={(text)=>{this.onChangeWordTextInput(text)}}/>
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
 
                     {recommendedWords}
@@ -235,7 +237,7 @@ export default class InstantSearchScreen extends Component {
                                 this.scrollToInput(ReactNative.findNodeHandle(event.target))
                             }}
                         />
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
                     <View style={{height:50}}/>
                 </KeyboardAwareScrollView>
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
     },
     folderSelectText:{
-        color:"#427677",
+        color:"#35466A",
         textAlign:'center',
         alignSelf:'center',
         marginRight:20,
@@ -298,9 +300,10 @@ const styles = StyleSheet.create({
         fontSize:18,
         paddingLeft:20,
         paddingRight:20,
+        marginBottom:5,
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },

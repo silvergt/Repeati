@@ -34,13 +34,14 @@ export default class ReviseWord extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
+                        fontWeight:'500'
                     }}>단어 수정</Text>,
                 headerLeft:
                     <TouchableOpacity style={
@@ -212,6 +213,7 @@ export default class ReviseWord extends Component {
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             style={styles.wordbookTextInput}
+                            autoFocus={true}
                             multiline={true}
                             maxLength={25}
                             returnKeyType='done'
@@ -220,7 +222,7 @@ export default class ReviseWord extends Component {
                             value={this.state.revisedWordTitle}
                             onChangeText={(text)=>{this.onChangeWordTextInput(text)}}
                         />
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
 
                     {recommendedWords}
@@ -262,7 +264,7 @@ export default class ReviseWord extends Component {
                                 this.scrollToInput(ReactNative.findNodeHandle(event.target))
                             }}
                         />
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
                 </KeyboardAwareScrollView>
                 {/*<TouchableOpacity  style={styles.lowerButton}*/}
@@ -304,7 +306,7 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
     },
     folderSelectText:{
-        color:"#427677",
+        color:"#35466A",
         textAlign:'center',
         alignSelf:'center',
         marginRight:20,
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
         paddingRight:20
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },

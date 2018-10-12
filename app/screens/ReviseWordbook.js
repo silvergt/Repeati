@@ -28,9 +28,10 @@ export default class ReviseWordbook extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
+                    fontWeight:'500'
                 },
                 headerTitle:
                     <Text style={{
@@ -130,12 +131,13 @@ export default class ReviseWordbook extends Component {
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             style={styles.wordbookTextInput}
+                            autoFocus={true}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
                             onChangeText={(text)=>{this.setState({revisedWordbookTitle:text})}}
                         >{this.state.wordbookSpecifics.title}</TextInput>
-                        <View style={{width:screen.width*2/3,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width*2/3,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
                     <View style={{height:60}}/>
                     <Text style={styles.plainText}>단어 수 : {this.state.wordbookLength}</Text>
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
         marginBottom:5,
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },

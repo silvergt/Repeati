@@ -49,12 +49,12 @@ export default class YesNoPopup extends Component {
                 coverScreen={true}
                 entry='top'
             >
-                <View style={[styles.deletePopupContainer,]}>
+                <View style={[styles.yesnoPopupContainer,]}>
                     <View style={{flex:1}}/>
-                    <Text style={styles.deletePopupText}>{this.props.title}</Text>
+                    <Text style={styles.yesnoPopupText}>{this.props.title}</Text>
                     <View style={{flex:1}}/>
                     <View style={{height:40,flexDirection:'row'}}>
-                        <TouchableOpacity style={[styles.deletePopupButton,{
+                        <TouchableOpacity style={[styles.yesnoPopupButton,{
                             // borderTopLeftRadius:10,
                             borderBottomLeftRadius:5,
                             backgroundColor:'#35466A',
@@ -67,10 +67,10 @@ export default class YesNoPopup extends Component {
                                               }
                                           }}
                         >
-                            <Text style={styles.deletePopupButtonText}>{this.props.left}</Text>
+                            <Text style={styles.yesnoPopupButtonText}>{this.props.left}</Text>
                         </TouchableOpacity>
                         <View style={{width:1}}/>
-                        <TouchableOpacity style={[styles.deletePopupButton,{
+                        <TouchableOpacity style={[styles.yesnoPopupButton,{
                             // borderTopRightRadius:10,
                             borderBottomRightRadius:5,
                             backgroundColor:'#35466A',
@@ -83,7 +83,7 @@ export default class YesNoPopup extends Component {
                                               }
                                           }}
                         >
-                            <Text style={styles.deletePopupButtonText}>{this.props.right}</Text>
+                            <Text style={styles.yesnoPopupButtonText}>{this.props.right}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -98,22 +98,22 @@ const styles = StyleSheet.create({
         borderBottomRightRadius:5,
         borderBottomLeftRadius:5,
     },
-    deletePopupContainer:{
+    yesnoPopupContainer:{
         flex:1,
         justifyContent:'center',
         alignItems:'center',
     },
-    deletePopupText:{
+    yesnoPopupText:{
         justifyContent:'center',
         textAlign:'center',
-        color:'black'
+        color:'black',
     },
-    deletePopupButton:{
+    yesnoPopupButton:{
         flex:1,
         justifyContent:'center',
         alignItems:'center',
     },
-    deletePopupButtonText:{
+    yesnoPopupButtonText:{
         textAlign:'center',
         color:'white'
     }

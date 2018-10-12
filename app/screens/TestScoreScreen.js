@@ -23,13 +23,14 @@ export default class TestScoreScreen extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
+                        fontWeight:'500'
                     }}>시험 결과</Text>,
                 headerLeft:
                     <TouchableOpacity
@@ -43,17 +44,7 @@ export default class TestScoreScreen extends Component {
                     >
                         <Image style={{width:20,height:20}} source={require("../res/images/back.png")}/>
                     </TouchableOpacity>,
-                headerRight:
-                    <TouchableOpacity
-                        style={{
-                            width:80,
-                            height:'100%',
-                            justifyContent:'center',
-                            alignItems:'center',
-                        }}
-                        onPress={()=>{navigation.state.params.holder.onClickedComplete()}}>
-                        <Text>점수확인</Text>
-                    </TouchableOpacity>
+
 
             }
         )
@@ -66,6 +57,7 @@ export default class TestScoreScreen extends Component {
     componentDidMount(){
         this.totalCorrect = this.props.navigation.getParam('totalCorrect',0);
         this.totalSolved = this.props.navigation.getParam('totalSolved',0);
+        this.wordbookID = this.props.navigation.getParam('wordbookID',-1);
         this.setState({})
 
     }
@@ -77,7 +69,7 @@ export default class TestScoreScreen extends Component {
     onClickReTest(){
         this.props.navigation.goBack();
         this.props.navigation.navigate('TestScreen',{
-            wordbookID:0,
+            wordbookID:this.wordbookID,
         })
     }
 

@@ -17,8 +17,9 @@ export default class WebScreen extends Component<Props> {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomWidth: 0,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerLeft:
                     <TouchableOpacity

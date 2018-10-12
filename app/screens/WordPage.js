@@ -8,7 +8,9 @@ import {
     FlatList,
     Image,
     Animated,
-    Platform, Dimensions
+    Platform,
+    Dimensions,
+    Alert,
 } from 'react-native';
 import {name as appName} from '../../app.json';
 import LowerBar from "../components/LowerBar";
@@ -44,13 +46,14 @@ export default class WordPage extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
+                        fontWeight:'500'
                     }}>
                         단어장 : {navigation.state.params.wordbookTitle}
                         </Text>,
@@ -147,7 +150,7 @@ export default class WordPage extends Component {
             case WordPage.RENDERTYPE_WORDMODIFY:
                 this.setState({
                     flatListRenderType: WordPage.RENDERTYPE_WORDMODIFY,
-                    flatListData: this.props.dictStore.wordbook[this.props.navigation.getParam('wordbookID',-1)].wordList,
+                    // flatListData: this.props.dictStore.wordbook[this.props.navigation.getParam('wordbookID',-1)].wordList,
                 });
                 break;
         }
@@ -209,8 +212,41 @@ export default class WordPage extends Component {
 
     
     render() {
-        return (
-            <View style={styles.container}>
+        let body=undefined;
+        if(this.state.flatListData === undefined || this.state.flatListData.length === 0){
+            console.log("flatListData is empty! : No wordbook existing");
+            body =
+                <View style={{flex:1,flexDirection:"column",justifyContent:'center'}}>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={ ()=>
+                        {
+                            this.props.navigation.navigate('AddNewWord',{
+                                wordbookID:this.props.navigation.getParam('wordbookID',-1),
+                                onGoBack:()=>{
+                                    this.setState({
+                                        flatListRenderType:WordPage.MODIFY_NEEDED_WORD,
+                                    });
+                                }
+                            })
+                        }
+                        }
+                    >
+                        <Image
+                            style={styles.newWordImage}
+                            source={require("../res/images/plus_thin.png")}
+                        />
+                        <Text
+                            style={styles.newWordTitle}
+                        >첫번째 단어 등록하기</Text>
+                        <Text
+                            style={styles.newWordText}
+                        >위 버튼을 눌러 단어를 등록해보세요.{"\n"}단어장 만들기랑 똑같아요.</Text>
+                    </TouchableOpacity>
+
+                </View>;
+        }else{
+            body =
                 <View style={{flex:1,flexDirection:"row"}}>
                     <FlatList
                         ref={comp => this.flatList = comp}
@@ -222,20 +258,37 @@ export default class WordPage extends Component {
                         }}
                         keyExtractor={(item, index) => index.toString()}
                         ItemSeparatorComponent={()=><View style={{
-                                opacity:0.2,
-                                marginLeft:15,
-                                marginRight:15,
-                                height:1,
-                                backgroundColor:'#447677'
-                            }}/>
+                            opacity:0.2,
+                            marginLeft:15,
+                            marginRight:15,
+                            height:1,
+                            backgroundColor:'#447677'
+                        }}/>
                         }
                     />
 
-                </View>
+                </View>;
+        }
+
+        return (
+            <View style={styles.container}>
+                {body}
                 <LowerBar
+                    btn2Enabled={false}
+                    btn3Enabled={false}
                     button1Pressed={()=>{
+                        if(this.state.flatListData.length<1){
+                            Alert.alert(
+                                "이런",
+                                "단어장에 단어를 먼저 등록해주세요!",
+                                [
+                                    {text:'OK', onPress:()=>{}}
+                                ]
+                            )
+                            return;
+                        }
                         this.props.navigation.navigate('TestScreen',{
-                            wordbookID:0,
+                            wordbookID:this.wordbookID,
                         })
                     }}
                     button2Pressed={()=>{
@@ -532,6 +585,24 @@ const styles = StyleSheet.create({
     },
     flatList:{
         flex:1,
+    },
+    newWordTitle:{
+        alignSelf:'center',
+        margin:20,
+        fontSize:20,
+        color:'black',
+        textAlign:'center'
+    },
+    newWordText:{
+        alignSelf:'center',
+        fontSize:14,
+        color:'black',
+        textAlign:'center'
+    },
+    newWordImage:{
+        alignSelf:'center',
+        width:60,
+        height:60,
     },
     headerRightContainer:{
         flexDirection:'row',

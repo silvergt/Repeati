@@ -33,14 +33,15 @@ export default class AddNewWord extends Component {
             {
                 headerStyle: {
                     backgroundColor: "#fff",
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
                     elevation:0,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
-                    }}>단어 추가</Text>,
+                        fontWeight:'500'
+                    }}>단어 등록</Text>,
                 headerLeft:
                     <TouchableOpacity
                         style={{
@@ -72,7 +73,7 @@ export default class AddNewWord extends Component {
     constructor(){
         super();
         this.state={
-            wordbookID:0,
+            wordbookID:-1,
             newWordTitle:"",
             newWordMean:"",
 
@@ -87,7 +88,7 @@ export default class AddNewWord extends Component {
         });
 
         this.setState({
-            wordbookID:this.props.navigation.getParam('wordbookID',0),
+            wordbookID:this.props.navigation.getParam('wordbookID',this.props.dictStore.wordbook[0].id),
         });
     }
 
@@ -208,6 +209,7 @@ export default class AddNewWord extends Component {
                         <TextInput
                             ref={comp=>this.wordInput=comp}
                             style={styles.wordbookTextInput}
+                            autoFocus={true}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
@@ -216,7 +218,7 @@ export default class AddNewWord extends Component {
                             underlineColorAndroid={"#FFFFFF"}
                             value={this.state.newWordTitle}
                             onChangeText={(text)=>{this.onChangeWordTextInput(text)}}/>
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
 
                     {recommendedWords}
@@ -258,7 +260,7 @@ export default class AddNewWord extends Component {
                                 this.scrollToInput(ReactNative.findNodeHandle(event.target))
                             }}
                         />
-                        <View style={{width:screen.width-100,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width-100,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
                 </KeyboardAwareScrollView>
                 {/*<TouchableOpacity  style={styles.lowerButton}*/}
@@ -301,7 +303,7 @@ const styles = StyleSheet.create({
         // justifyContent:'center'
     },
     folderSelectText:{
-        color:"#427677",
+        color:"#35466A",
         textAlign:'center',
         alignSelf:'center',
         marginRight:20,
@@ -332,7 +334,7 @@ const styles = StyleSheet.create({
         paddingTop:10,
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },

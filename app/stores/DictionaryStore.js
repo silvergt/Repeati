@@ -81,6 +81,18 @@ export class DictionaryStore {
     }
 
 
+    //첫 번째 단어장부터 하나씩 검색해 단어가 하나라도 있는 단어장을 불러옴. 없으면 -1 리턴
+    getAnyWordbookHasWord(){
+        for(let i=0;i<this.wordbook.length;i++){
+            console.log("mo",i);
+            if(this.wordbook[i].wordList.length !== 0){
+                return this.wordbook[i].id;
+            }
+        }
+        return -1;
+    }
+
+
     getWordIndexById(wordbookID,wordID){
         for(let i=0;i<this.wordbook.length;i++){
             for(let j=0;j<this.wordbook[i].wordList.length;j++){
@@ -101,7 +113,6 @@ export class DictionaryStore {
 
 
     deleteWordbook(wordbookID){
-        if(this.wordbook.length===1){return}
         let index = -1;
         for(let i=0;i<this.wordbook.length;i++){
             if(this.wordbook[i].id === wordbookID){

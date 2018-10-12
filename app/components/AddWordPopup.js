@@ -60,14 +60,14 @@ export default class AddWordPopup extends Component {
                                   onPress={()=>{this.openAddNewFolderScreen()}}>
                     <Image style={styles.buttonImage} source={require("../res/images/folder.png")}/>
                     <View style={styles.buttonPadding}/>
-                    <Text style={styles.buttonText}>폴더 추가</Text>
+                    <Text style={styles.buttonText}>단어장 생성</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.buttonContainer,{paddingRight:20}]}
                                   activeOpacity={0.5}
                                   onPress={()=>{this.openAddNewWordScreen()}}>
                     <Image style={styles.buttonImage} source={require("../res/images/word.png")}/>
                     <View style={styles.buttonPadding}/>
-                    <Text style={styles.buttonText}>단어 추가</Text>
+                    <Text style={styles.buttonText}>단어 등록</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.closeButton}
@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
         height:20,
     },
     buttonText:{
+        fontWeight:'200'
     },
     closeButton:{
         position:'absolute',

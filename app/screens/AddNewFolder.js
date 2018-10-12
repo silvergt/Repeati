@@ -36,13 +36,14 @@ export default class AddNewFolder extends Component {
                 headerStyle: {
                     backgroundColor: "#fff",
                     elevation:0,
-                    borderBottomColor:'#222222',
-                    borderBottomWidth:0.3,
+                    borderBottomColor:'#CCCCCC',
+                    borderBottomWidth:0.5,
                 },
                 headerTitle:
                     <Text style={{
                         color:'black',
-                    }}>단어장 추가</Text>,
+                        fontWeight:'500'
+                    }}>단어장 생성</Text>,
                 headerLeft:
                     <TouchableOpacity style={
                         {
@@ -122,12 +123,13 @@ export default class AddNewFolder extends Component {
                     <View style={styles.wordbookTextInputContainer}>
                         <TextInput
                             style={styles.wordbookTextInput}
+                            autoFocus={true}
                             maxLength={25}
                             returnKeyType='done'
                             blurOnSubmit={true}
                             onChangeText={(text)=>{this.setState({wordbookTitle:text})}}
                         >{this.state.wordbookTitle}</TextInput>
-                        <View style={{width:screen.width*2/3,height:2,backgroundColor:'#427677',alignSelf:'center',}}/>
+                        <View style={{width:screen.width*2/3,height:2,backgroundColor:'#35466A',alignSelf:'center',}}/>
                     </View>
                     <View style={{flex:1.5}}/>
                 </View>
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
         marginBottom:5,
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },

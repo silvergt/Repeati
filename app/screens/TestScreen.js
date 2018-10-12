@@ -46,6 +46,7 @@ export default class TestScreen extends Component {
                 headerTitle:
                     <Text style={{
                         color:'black',
+                        fontWeight:'500'
                     }}>단어 시험</Text>,
                 headerLeft:
                     <TouchableOpacity
@@ -81,7 +82,7 @@ export default class TestScreen extends Component {
         this.state={
             testType:TestScreen.TESTTYPE_ENG_TO_KOR,
         };
-        this.wordbookID = 0;
+        this.wordbookID = -1;
         this.cardList = [];
         this.totalSolved = 0;
         this.totalCorrect = 0;
@@ -94,7 +95,7 @@ export default class TestScreen extends Component {
             holder:this,
         });
 
-        this.wordbookID = this.props.navigation.getParam('wordbookID',0);
+        this.wordbookID = this.props.navigation.getParam('wordbookID',this.props.dictStore.wordbook[0].id);
 
         this.addWordListIntoCards();
     }
@@ -111,6 +112,7 @@ export default class TestScreen extends Component {
     }
     
     addWordListIntoCards(){
+        if(this.wordbookID === -1 ){return}
         let wordbookTemp = this.props.dictStore.getWordbookById(this.wordbookID);
 
         const shuffledWordList = this.shuffleLists(wordbookTemp.wordList);
@@ -118,6 +120,11 @@ export default class TestScreen extends Component {
         for(let i=0;i<shuffledWordList.length;i++){
             this.cardList.push(shuffledWordList[i]);
         }
+
+        if(this.cardList.length < 4){
+            this.addWordListIntoCards();
+        }
+
 
         this.setState({})
     }
@@ -145,6 +152,7 @@ export default class TestScreen extends Component {
         this.props.navigation.navigate("TestScoreScreen",{
             totalSolved : this.totalSolved,
             totalCorrect : this.totalCorrect,
+            wordbookID : this.wordbookID,
         });
     }
 
@@ -283,9 +291,20 @@ export default class TestScreen extends Component {
                                 style={selectStyles.itemContainer}
                                 activeOpacity={0.8}
                                 onPress={()=>{
-                                    this.selectWordbookPopup.close();
-                                    this.changeWordbook(item.id);
-                                    this.setState({});
+                                    if(this.props.dictStore.getWordbookById(item.id).wordList.length === 0){
+                                        Alert.alert(
+                                            "앗",
+                                            "단어장에 단어가 하나도 없어요",
+                                            [
+                                                {text:"뒤로가기",onPress:()=>{}}
+                                            ]
+
+                                        )
+                                    }else{
+                                        this.selectWordbookPopup.close();
+                                        this.changeWordbook(item.id);
+                                        this.setState({});
+                                    }
                                 }}
                             >
                                 <Text style={selectStyles.itemTitle}>{item.title}</Text>
@@ -418,7 +437,7 @@ const styles = StyleSheet.create({
         backgroundColor:'#EEEEEE',
     },
     folderSelectText:{
-        color:"#427677",
+        color:"#35466A",
         textAlign:'center',
         alignSelf:'center',
         marginRight:20,
@@ -446,7 +465,7 @@ const styles = StyleSheet.create({
         marginBottom:5,
     },
     plainText:{
-        color:"#427677",
+        color:"#35466A",
         fontSize:16,
         alignSelf:'center',
     },
@@ -462,7 +481,7 @@ const styles = StyleSheet.create({
     upperOptionContainer:{
         backgroundColor:'#fff',
         paddingBottom:20,
-        borderBottomColor:'#222222',
+        borderBottomColor:'#CCCCCC',
         borderBottomWidth:0.4,
     }
 });
@@ -498,12 +517,13 @@ const cardStyles = StyleSheet.create({
         backgroundColor:'white',
         borderRadius:10,
         borderWidth:1,
-        borderColor:'#427677',
+        borderColor:'#A4A4A4',
     },
     hintText:{
         textAlign:'center',
         fontSize:24,
         color:'black',
+        fontWeight:'500'
     },
     answerText:{
         flex:1.6,
@@ -511,6 +531,7 @@ const cardStyles = StyleSheet.create({
         textAlign:'center',
         fontSize:18,
         color:'black',
+        fontWeight:'100'
     },
     guideText:{
         alignSelf:'center',
@@ -520,6 +541,7 @@ const cardStyles = StyleSheet.create({
         bottom:0,
         marginBottom:10,
         color:'black',
+
     },
     toDaumImage:{
         alignSelf:'center',

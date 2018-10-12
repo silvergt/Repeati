@@ -12,8 +12,27 @@ import {
     TouchableOpacity,
     Text, Dimensions,
 } from 'react-native';
+import Image from 'react-native-fast-image'
 
 export default class LowerBar extends Component {
+
+    constructor(){
+        super();
+
+        this.state={
+            btn1Enabled:true,
+            btn2Enabled:true,
+            btn3Enabled:true,
+        }
+    }
+
+    componentDidMount(){
+        this.setState({
+            btn1Enabled:this.props.btn1Enabled === undefined ? true : this.props.btn1Enabled,
+            btn2Enabled:this.props.btn2Enabled === undefined ? true : this.props.btn2Enabled,
+            btn3Enabled:this.props.btn3Enabled === undefined ? true : this.props.btn3Enabled,
+        })
+    }
 
     onButton1Pressed(){
         if(this.props.button1Pressed !== undefined) {
@@ -36,26 +55,64 @@ export default class LowerBar extends Component {
 
     render() {
 
+        let btn1,btn2,btn3;
+
+        if(this.state.btn1Enabled){
+            btn1=
+                <TouchableOpacity
+                    style={styles.button1}
+                    onPress={()=>this.onButton1Pressed()}>
+                    <Image
+                        style={styles.innerImage}
+                        source={require("../res/images/tabbar/test.png")}
+                        resizeMode={Image.resizeMode.contain}
+                    />
+                    <Text style={styles.innerText}>시험 시작</Text>
+                </TouchableOpacity>;
+        }else{
+            btn1=undefined;
+        }
+
+        if(this.state.btn2Enabled){
+            btn2=
+                <TouchableOpacity
+                    style={styles.button1}
+                    onPress={()=>this.onButton2Pressed()}>
+                    <Image
+                        style={styles.innerImage}
+                        source={require("../res/images/tabbar/search.png")}
+                        resizeMode={Image.resizeMode.contain}
+                    />
+                    <Text style={styles.innerText}>빠른 검색</Text>
+                </TouchableOpacity>;
+        }else{
+            btn2=undefined;
+        }
+
+        if(this.state.btn3Enabled){
+            btn3=
+                <TouchableOpacity
+                    style={styles.button3}
+                    onPress={()=>this.onButton3Pressed()}>
+                    <Image
+                        style={styles.innerImage}
+                        source={require("../res/images/tabbar/settings.png")}
+                        resizeMode={Image.resizeMode.contain}
+                    />
+                    <Text style={styles.innerText}>설정</Text>
+                </TouchableOpacity>;
+        }else{
+            btn3=undefined;
+        }
+
 
         return (
             <View style={{flexDirection:"column"}}>
                 <View style={styles.shadow}/>
                 <View style={styles.container}>
-                    <TouchableOpacity
-                        style={styles.button1}
-                        onPress={()=>this.onButton1Pressed()}>
-                        <Text style={styles.innerText}>시험 시작</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.button2}
-                        onPress={()=>this.onButton2Pressed()}>
-                        <Text style={styles.innerText}>빠른 검색</Text>
-                    </TouchableOpacity>
-                    {/*<TouchableOpacity*/}
-                    {/*style={styles.button3}*/}
-                    {/*onPress={()=>this.onButton3Pressed}>*/}
-                        {/*<Text style={styles.innerText}>마이페이지</Text>*/}
-                {/*</TouchableOpacity>*/}
+                    {btn1}
+                    {btn2}
+                    {btn3}
                 </View>
             </View>
         );
@@ -70,13 +127,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         width:screen.width,
         height:lowerBarHeight,
-        paddingLeft:15,
-        paddingRight:15,
-        backgroundColor:'white'
+        backgroundColor:'white',
     },
     shadow:{
         height:1,
-        backgroundColor:"#A5BAE5",
+        backgroundColor:"#CCCCCC",
     },
     button1:{
         flex:1,
@@ -90,9 +145,17 @@ const styles = StyleSheet.create({
         flex:1,
         justifyContent: 'center',
     },
+    innerImage:{
+        height:"38%",
+        justifyContent:'center',
+        marginBottom:5,
+        alignSelf:'center'
+    },
     innerText:{
+        justifyContent:'center',
         textAlign:'center',
-        color:"#3D485E",
-        fontSize:15
+        color:"#000000",
+        fontSize:11,
+        fontWeight:'100'
     }
 });
